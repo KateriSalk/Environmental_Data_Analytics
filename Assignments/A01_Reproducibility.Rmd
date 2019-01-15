@@ -37,17 +37,17 @@ Why are reproducible practices becoming the norm in data analytics?
 ### Question
 What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
 
-> Answer: I used R and Git in a previous internship to do data management for the department that I worked for. I mainly used R markdown to standardize word documents. And I used Git to keep my progress up-to-date with my coworkers.
+> Answer: I used R and Git in a previous internship to do data management for the department that I worked for. I mainly used R markdown to standardize word documents. And I used Git to keep my progress up-to-date with my coworkers. Therefore, I used R in a formal setting before.
 
 ### Question
 Are there any components of the course about which you feel confident?
 
-> Answer: I am confident about navigating myself through R in terms of using its basic functions, especially those related to R markdown.
+> Answer: I am confident about navigating myself through the program itself in terms of using its basic functions, especially those related to R markdown. And I feel confident in communicating my concerns and struggles with my instructors in this class; I will make sure I ask questions when I am stuck and receive feedback and help.
 
 ### Question
 Are there any components of the course about which you feel apprehensive?
 
-> Answer: I am not confident in finding solutions to address with errors that come up. And I want to learn more about the fundamentals about R coding.
+> Answer: I am not confident in finding solutions to address with errors that come up. And I want to learn more about the fundamentals about R coding. I am also not sure about how classmates are going to help each other in this kind of setting since I feel like we are working individually most of the time. It would be helpful if we have a problem session, even just for an hour or two each week for students to bring their questions to discuss with instructors or among each other.
 
 
 ## 2) GitHub
