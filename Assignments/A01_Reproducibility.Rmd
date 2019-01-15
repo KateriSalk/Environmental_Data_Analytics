@@ -2,8 +2,8 @@
 title: 'Assignment 1: Reproducibility, Workflow, Version Control'
 author: "Wanchen(Connie) Xiong"
 output:
-  word_document: default
   pdf_document: default
+  word_document: default
 geometry: margin=2.54cm
 ---
 
