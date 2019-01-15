@@ -1,6 +1,6 @@
 ---
 title: "Assignment 1: Reproducibility, Workflow, Version Control"
-author: "Student Name"
+author: Wanchen(Connie) Xiong
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -30,22 +30,22 @@ The completed exercise is due on Thursday, 17 January, 2018 before class begins.
 ### Question
 Why are reproducible practices becoming the norm in data analytics?
 
-> Answer: 
+> Answer: Reproducible practice is becoming the norm because it is important to establish such practice so that someone else can use the practice to obtain the same result. It enhances efficiency in processing data.
 
 ### Question
 What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
 
-> Answer: 
+> Answer: I used R and Git in a previous internship to do data management for the department that I worked for. I mainly used R markdown to standardize word documents. And I used Git to keep my progress up-to-date with my coworkers.
 
 ### Question
 Are there any components of the course about which you feel confident?
 
-> Answer: 
+> Answer: I am confident about navigating myself through R in terms of using its basic functions, especially those related to R markdown.
 
 ### Question
 Are there any components of the course about which you feel apprehensive?
 
-> Answer: 
+> Answer: I am not confident in finding solutions to address with errors that come up. And I want to learn more about the fundamentals about R coding.
 
 
 ## 2) GitHub
@@ -53,6 +53,7 @@ Are there any components of the course about which you feel apprehensive?
 ### Your Repository
 Provide a link below to your course repository in GitHub. Make sure you have pulled all recent changes from the course repository (https://github.com/KateriSalk/Environmental_Data_Analytics) and that you have updated your course README file. 
 
-> Answer: 
+> Answer: https://github.com/conxiong/Environmental_Data_Analytics.git
+> I have updated my course README file. 
 
 
