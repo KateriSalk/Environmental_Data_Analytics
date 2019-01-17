@@ -118,9 +118,9 @@ R functions are the major tool used in R. Functions can do virtually unlimited t
 seq(1, 10)
 ten_sequence <- seq(1, 10)
 ten_sequence
-(ten_sequence <- seq(1, 10))
+(ten_sequence <- seq(1, 10)) # assgin and also run inthe console
 
-seq(1, 10, 2) # from, to, by
+seq(1, 10, 2) # from, to, by, default is go by 1
 ```
 
 ### Getting help within R
