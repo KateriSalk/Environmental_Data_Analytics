@@ -5,6 +5,7 @@ Data analytics course for Duke University. Course code: ENV 872L
 
 ## User: Kateri Salk
 
+
 ## Instructions for using this repository: 
 1. Fork this repository into your own GitHub account. 
 2. Clone your forked repository onto your local drive. 
