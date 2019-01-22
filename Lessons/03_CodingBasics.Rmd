@@ -121,6 +121,9 @@ ten_sequence
 (ten_sequence <- seq(1, 10)) # assgin and also run inthe console
 
 seq(1, 10, 2) # from, to, by, default is go by 1
+
+just a test
+sdh
 ```
 
 ### Getting help within R
