@@ -1,6 +1,6 @@
 ---
 title: "Assignment 1: Reproducibility, Workflow, Version Control"
-author: "Student Name"
+author: "Xin Zhang"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -30,29 +30,28 @@ The completed exercise is due on Thursday, 17 January, 2018 before class begins.
 ### Question
 Why are reproducible practices becoming the norm in data analytics?
 
-> Answer: 
+> Answer: 1. Reproducible practices can confirm the correctness of one's data analytics results 2. Other people can learn and use the reproducible practices to do their own analytics and this interactive learning can save a lot of time, which can promote the development of data analytics.
 
 ### Question
 What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
 
-> Answer: 
+> Answer: I took the course ENVIRON710 (R) last semester and this is my only experience with R. My previous data analytics experiences were using excel, SPSS, Origin and a little bit Matlab to do soil science research. I never used Git before. 
 
 ### Question
 Are there any components of the course about which you feel confident?
 
-> Answer: 
+> Answer: I am confident about the GLM part, because in the R course, we learnt backwards model selection for almost half of the semster. 
 
 ### Question
 Are there any components of the course about which you feel apprehensive?
 
-> Answer: 
-
+> Answer: I feel apprehensive about the Github usage. I spent so much time with the Pull, Commit, and Push this time, and I think I made almost all the possible mistakes (Fortunately it worked finally). I'm worried what if this situation happens every time...(and I think it will...)  
 
 ## 2) GitHub
 
 ### Your Repository
 Provide a link below to your course repository in GitHub. Make sure you have pulled all recent changes from the course repository (https://github.com/KateriSalk/Environmental_Data_Analytics) and that you have updated your course README file. 
 
-> Answer: 
+> Answer: https://github.com/zhangxsaras/Environmental_Data_Analytics.git
 
 
