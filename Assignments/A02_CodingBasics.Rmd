@@ -1,6 +1,6 @@
 ---
 title: "Assignment 2: Coding Basics"
-author: "Student Name"
+author: "Xin Zhang"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -36,8 +36,16 @@ The completed exercise is due on Thursday, 24 January, 2019 before class begins.
 4. Insert comments in your code to describe what you are doing.
 
 ```{r}
-
+#1. generete a sequence from 1 to 100 step by 4, and name it "onehundred_seq"
+onehundred_seq <- seq(1, 100, 4)
+#2. compute the mean and median using the mean(), and median() function, 
+#and the results are as following:
+mean(onehundred_seq)
+median(onehundred_seq)
+#3. use conditional statement to determine whether the mean is greater than the median
+mean(onehundred_seq)>median(onehundred_seq)
 ```
+>ANSWER:The consequence is generating used onehundred_seq <- seq(1, 100, 4).The mean and the median of this consequence are both 49, and as the result shows 'False',which means the mean is not greater than the median.
 
 ## Basics Day 2
 
@@ -50,21 +58,58 @@ The completed exercise is due on Thursday, 24 January, 2019 before class begins.
 8. Label the columns of your data frame with informative titles.
 
 ```{r}
-
+#create a series of vetors
+Vec_names <- c("A", "B", "C", "D") # character vector
+Vec_names
+Vec_scores <- c(100, 80, 60, 40) # numeric vector
+Vec_scores
+Vec_pass_status <- c(TRUE, TRUE, TRUE, FALSE) #logical vector
+Vec_pass_status
+#create a dataframe
+df_student_info <- data.frame(Vec_names, Vec_scores, Vec_pass_status)
+names(df_student_info) <- c("Student_Name", "Score", "Pass_OR_NOT")
+View(df_student_info)
 ```
 
 9. QUESTION: How is this data frame different from a matrix?
 
-> ANSWER: 
+> ANSWER: In a data frame, you can have different type vectors, but in a matrix, the vetor type should be consistent. 
 
 10. Create a function with an if/else statement. Your function should determine whether a test score is a passing grade of 50 or above (TRUE or FALSE). You will need to choose either the `if` and `else` statements or the `ifelse` statement. The name of your function should be informative.
 
 11. Apply your function to the vector with test scores that you created in number 5. 
 
 ```{r}
+#create a function to determine pass or not with 'if' and 'else'
+pass_or_not <- function(score) {
+  i = length(score) # the total numbers of elements in the score vector
+  n=1
+  status<-c()
+ for (n in 1:i) { # for each element in the score vector, determine it is pass or not
+   if (score[n] >= 50) {
+    status[n] <- TRUE
+  }
+  else{
+    status[n] <- FALSE
+  }
+   n= n + 1
+ }
+  return(status[1:i]) # combine the pass statuse in one vector
+}
+
+#apply the function 
+View(Vec_scores)
+pass_status<- pass_or_not(score = Vec_scores)
+pass_status
+
+#solution 2, use ifelse()
+pass_or_not2 <- function(score) {
+   ifelse(score >= 50, TRUE, FALSE)
+}
+pass_or_not2(score=Vec_scores)
 
 ```
 
 12. QUESTION: Which option of `if` and `else` vs. `ifelse` worked? Why?
 
-> ANSWER: 
+> ANSWER: Both of them can work, but when using 'if' and 'else', a loop to define the element sequence is also needed, otherwise, only the output will only include the first element. However, when using 'ifelse', it can be direcly used without a loop.
