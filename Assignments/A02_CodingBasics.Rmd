@@ -3,6 +3,8 @@ title: "Assignment 2: Coding Basics"
 author: "Wanchen Xiong"
 output: pdf_document
 geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## OVERVIEW
