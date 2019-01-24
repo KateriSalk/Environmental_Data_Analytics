@@ -1,6 +1,6 @@
 ---
 title: "Assignment 2: Coding Basics"
-author: "Student Name"
+author: "Wanchen Xiong"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -59,20 +59,36 @@ mean(sequence1) > median(sequence1)
 
 ```{r}
 
+#Create a character vector with four student names
+name <- c("Adam", "Brandon", "Charles", "Daniel")
+#Create a numerical vector with scores of each student
+score <- c(89, 88, 50, 49)
+#Create a logical vecror
+pass <- score > 50
+#Create a dataframe that shows all the student and their score information
+studentinfo <- data.frame(name, score, pass)
+
 ```
 
 9. QUESTION: How is this data frame different from a matrix?
 
-> ANSWER: 
+> ANSWER: Matrix contains only one type of data like numbers, whereas data frame can contain different types of data. 
 
 10. Create a function with an if/else statement. Your function should determine whether a test score is a passing grade of 50 or above (TRUE or FALSE). You will need to choose either the `if` and `else` statements or the `ifelse` statement. The name of your function should be informative.
 
 11. Apply your function to the vector with test scores that you created in number 5. 
 
 ```{r}
+#create a function using ifelse statement, if the score is equal to or more than 50, then returns true, if not, then returns false
+check_score <- function(x) {
+  ifelse(x >= 50, TRUE, FALSE)
+}
+
+#Apply this function to the numerical vector and check the results
+pass_or_not <- check_score(score) ; pass_or_not
 
 ```
 
 12. QUESTION: Which option of `if` and `else` vs. `ifelse` worked? Why?
 
-> ANSWER: 
+> ANSWER: "if" and "else" did not work out because it applies to one element; however, the vector had more than one elements, thus only the first element was used. "ifelse" worked because it returned value based on the elements in the condition; it worked with multiple elements.
