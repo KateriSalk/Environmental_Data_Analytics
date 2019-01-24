@@ -36,45 +36,45 @@ vector2
 vector3 <- c(TRUE,TRUE,TRUE,FALSE,TRUE,FALSE) #logical vector
 vector3
 
-vector1[3] # 
+vector1[3] # Tell me the 3rd element of vector 1
 
 # Matrices ----
-matrix1 <- matrix(1:20, nrow = 5,ncol = 4) # 
+matrix1 <- matrix(1:20, nrow = 5,ncol = 4) # Create a matrix, make 5 rows, and 4 columns
 matrix1
-matrix2 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE) #
+matrix2 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE) # same numbers as above; the only difference is that it's going horizontally first, this tells us that by de fault R goes vertically which is by column
 matrix2
 matrix3 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE, # return after comma continues the line
                   dimnames = list(c("uno", "dos", "tres", "cuatro", "cinco"), 
-                                  c("un", "deux", "trois", "cat"))) #
+                                  c("un", "deux", "trois", "cat"))) # Give names to the row and column
 matrix3
 
-matrix1[4, ] #
-matrix1[ , 3] #
-matrix1[c(12, 14)] #
-matrix1[c(12:14)] #
-matrix1[2:4, 1:3] #
+matrix1[4, ] # Get the 4th row of matrix 1
+matrix1[ , 3] # Get the 3rd column of matrix 1
+matrix1[c(12, 14)] # Get the 12th and 14th element in matrix 1
+matrix1[c(12:14)] # Get the elements from 12th to 14th
+matrix1[2:4, 1:3] # Get the elements in row 2 to 4, and from column 1 to 3
 
 cells <- c(1, 26, 24, 68)
 rnames <- c("R1", "R2")
 cnames <- c("C1", "C2") 
 matrix4 <- matrix(cells, nrow = 2, ncol = 2, byrow = TRUE,
-  dimnames = list(rnames, cnames)) # 
+  dimnames = list(rnames, cnames)) # create the matrix using what's in cells, and the name given by rnames and cnames
 matrix4
 
 # Lists ---- 
-list1 <- list(name = "Maria", mynumbers = vector1, mymatrix = matrix1, age = 5.3); list1
+list1 <- list(name = "Maria", mynumbers = vector1, mymatrix = matrix1, age = 5.3); list1 #The semicolon is telling you to run the thing before and after it altogether
 list1[[2]]
 
 # Data Frames ----
-d <- c(1, 2, 3, 4) # What type of vector?
-e <- c("red", "white", "red", NA) # What type of vector?
-f <- c(TRUE, TRUE, TRUE, FALSE) # What type of vector?
-dataframe1 <- data.frame(d,e,f) #
-names(dataframe1) <- c("ID","Color","Passed"); View(dataframe1) # 
+d <- c(1, 2, 3, 4) # What type of vector? --numerical 
+e <- c("red", "white", "red", NA) # What type of vector? --character; put NA or not put anything is the same
+f <- c(TRUE, TRUE, TRUE, FALSE) # What type of vector? -- logical
+dataframe1 <- data.frame(d,e,f) # combine d, e, and f
+names(dataframe1) <- c("ID","Color","Passed"); View(dataframe1) # rename the columns  
 
-dataframe1[1:2] # 
-dataframe1[c("ID","Passed")] # 
-dataframe1$Color # 
+dataframe1[1:2] # Get column 1 and 2; it would be dataframe1[1:2,] to get row 1 and 2
+dataframe1[c("ID","Passed")] # Get item ID and Passed
+dataframe1$Color # Get item color by using $; levels means the unique values in the group specified
 
 ```
 QUESTION: How do the different types of data appear in the Environment tab?
