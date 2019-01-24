@@ -183,7 +183,7 @@ recipe3 <- function(x, f){
               mix2 = mix2))
 }
 
-doublecomplexmeal <- recipe3(x = 5, f = 2)
+doublecomplexmeal <- recipe3(x = 5, f = 2) #use the actual name of the ingredient, but you don't have to, you can do recipe3(5, 2)
 doublecomplexmeal
 doublecomplexmeal$mix1
 ```
@@ -215,10 +215,10 @@ meal3 <- recipe5(3); meal3
 
 recipe6 <- function(x){
   ifelse(x<3, x*2, x/2)
-  
+  #put them all in one sentence, basically ifelse(condition, return this if true, return this if false)
 }
 
 meal4 <- recipe6(4); meal4
 meal5 <- recipe6(2); meal5
-```
+``` 
 
