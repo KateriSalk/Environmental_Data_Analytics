@@ -35,6 +35,7 @@ If your working directory is not set to the folder you want, you have several op
 
 ```{r}
 # Absolute file path is commented out
+# because it is not reproducible
 #setwd("/Users/katerisalk/Documents/Duke/Courses/Environmental_Data_Analytics")
 ```
 
@@ -50,7 +51,7 @@ At the same time, you should also load your theme if you are doing any data visu
 
 ```{r}
 # Load package
-library(tidyverse)
+library(tidyverse) #more reproducible when type in script rather than check the box, require() fucntion will not tell you there is a issue when there is one, recommend library()
 ```
 
 ### Import your datasets
@@ -81,16 +82,20 @@ USGS.flow.data <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
 
 ```
 
+##notes
+### 1 WD; 2 pakages; 3 Data
+
 ## EXPLORE YOUR DATASET
 
 Take a moment to read through the README file associated with the USGS dataset on discharge at the Eno River. Where can you find this file? How does the placement and information found in this file relate to the best practices for reproducible data analysis?
-> ANSWER: 
+> ANSWER: On USGS official website. It indicates 
 
 ```{r}
 View(USGS.flow.data)
 # Alternate option: click on data frame in Environment tab
 
 class(USGS.flow.data)
+# You can try to break the dataframe and make tables - Xin 01/24/2019
 colnames(USGS.flow.data)
 
 # Rename columns
@@ -105,23 +110,23 @@ str(USGS.flow.data)
 dim(USGS.flow.data)
 length(USGS.flow.data)
 
-head(USGS.flow.data)
-head(USGS.flow.data, 10)
-tail(USGS.flow.data, 5)
+head(USGS.flow.data) #find the first 6 rows
+head(USGS.flow.data, 10) 
+tail(USGS.flow.data, 5) #find the last several rows, default is 6 row
 USGS.flow.data[30000:30005, c(3, 8, 14)]
 
 class(USGS.flow.data$datetime)
 class(USGS.flow.data$discharge.mean)
 class(USGS.flow.data$gage.height.mean)
 
-summary(USGS.flow.data)
+summary(USGS.flow.data) # give you the basic statistics if they are numeric 
 summary(USGS.flow.data$discharge.mean)
 summary(USGS.flow.data$gage.height.mean)
 
 ```
 
 What happened to blank cells in the spreadsheet when they were imported into R?
-> ANSWER: 
+> ANSWER: They are stored as NAs. 
 
 ## TIPS AND TRICKS: SPREADSHEETS
 
