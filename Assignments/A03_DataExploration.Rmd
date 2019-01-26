@@ -1,6 +1,6 @@
 ---
 title: "Assignment 3: Data Exploration"
-author: "Student Name"
+author: "Wanchen Xiong"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -30,13 +30,21 @@ The completed exercise is due on Thursday, 31 January, 2019 before class begins.
 Check your working directory, load necessary packages (tidyverse), and upload the North Temperate Lakes long term monitoring dataset for the light, temperature, and oxygen data for three lakes (file name: NTL-LTER_Lake_ChemistryPhysics_Raw.csv). Type your code into the R chunk below.
 ```{r}
 
+getwd()
+
+setwd("C:/Users/Wanch/Desktop/ENVI 872 data/Environmental_Data_Analytics")
+
+library(tidyverse)
+
+monitoring_threelakes <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
+
 ```
 
 ## 2) Learn about your system
 
 Read about your dataset in the NTL-LTER README file. What are three salient pieces of information you gained from reading this file?
 
-> ANSWER: 
+> ANSWER: This file contains data from studies on several lakes in the North Temperate Lakes District in Wisconsin, USA. Data were collected as part of the Long Term Ecological Research station established by the National Science Foundation. The three aspects of the data are Carbon, which covers from 1984 to 2016, nutrients, which covers from 1991 to 2016, and physical and chemical limnology, which covers from 1984 to 2016.
 
 ## 3) Obtain basic summaries of your data
 
@@ -49,21 +57,41 @@ Write R commands to display the following information:
 5. summary of lakename, depth, and temperature
 
 ```{r}
-# 1
+# 1 Display the dimension of the dataset:
 
-# 2
+dim(monitoring_threelakes)
 
-# 3
+# 2 Display the class of the dataset:
 
-# 4
+class(monitoring_threelakes)
 
-# 5
+# 3 Display the first 8 rows of the dataset
+
+head(monitoring_threelakes)
+
+# 4 Display the class of each variable: lakename, sampledata, depth, and temperature
+
+class(monitoring_threelakes$lakename)
+class(monitoring_threelakes$sampledate)
+class(monitoring_threelakes$depth)
+class(monitoring_threelakes$temperature_C)
+
+# 5 Summarize the data under lakename, depth, and temperature
+
+summary(monitoring_threelakes$lakename)
+summary(monitoring_threelakes$depth)
+summary(monitoring_threelakes$temperature_C)
 
 ```
 
 Change sampledate to class = date. After doing this, write an R command to display that the class of sammpledate is indeed date. Write another R command to show the first 10 rows of the date column. 
 
 ```{r}
+
+monitoring_threelakes$sampledate <- as.Date(monitoring_threelakes$sampledate, format = "%m/%d/%y")
+class(monitoring_threelakes$sampledate)
+
+head(monitoring_threelakes$sampledate, 10)
 
 ```
 
