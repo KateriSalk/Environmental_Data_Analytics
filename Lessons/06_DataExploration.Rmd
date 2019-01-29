@@ -91,17 +91,17 @@ USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%m/%d/%y")
 Note that for every date prior to 1969, R has assigned the date in the 2000s rather than the 1900s. This can be fixed with an `ifelse` statement inside a function. Run through the code below and write what is happening in the comment above each line.
 
 ```{r}
-# 
+# change it to the format of year-month-day sequence number, just use format instead of as.date -- Xin 01292019
 USGS.flow.data$datetime <- format(USGS.flow.data$datetime, "%y%m%d")
 
-#
+# create a function to identify year exceed this year -- Xin 01292019
 create.early.dates <- (function(d) {
        paste0(ifelse(d > 181231,"19","20"),d)
        })
-#
+# add the correct year to the date -- Xin 01292019
 USGS.flow.data$datetime <- create.early.dates(USGS.flow.data$datetime)
 
-#
+# format the year-month-date as data format -- Xin 01292019
 USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%Y%m%d") 
 
 ```
@@ -116,12 +116,12 @@ summary(USGS.flow.data$gage.height.mean)
 ```
 Question: What types of research questions might make it favorable to remove NAs from a dataset, and what types of research questions might make it favorable to retain NAs in the dataset?
 
-> Answer: 
+> Answer: When NA is one of the answers, it is favorable; when it indicates missing data, we need to remove them. Certain ways of stats mdoels do not allow NAs. -- Xin 01292019
 
 ```{r}
-USGS.flow.data.complete <- na.omit(USGS.flow.data)
+USGS.flow.data.complete <- na.omit(USGS.flow.data) #delete the complete row if there is NA in one cell  -- Xin 01292019
 dim(USGS.flow.data)
-dim(USGS.flow.data.complete)
+dim(USGS.flow.data.complete) # dim - dimension
 
 mean(USGS.flow.data.complete$discharge.mean)
 sd(USGS.flow.data.complete$discharge.mean)
@@ -153,15 +153,15 @@ Visualize distributions of values for continuous numerical variables. What is ha
 ggplot(USGS.flow.data.complete) +
   geom_histogram(aes(x = discharge.mean))
 
-#
+# narrowers binwidth
 ggplot(USGS.flow.data.complete) +
   geom_histogram(aes(x = discharge.mean), binwidth = 10)
 
-#
+# bins defines the bin numbers
 ggplot(USGS.flow.data.complete) +
   geom_histogram(aes(x = discharge.mean), bins = 20)
 
-#
+# define the x axis range
 ggplot(USGS.flow.data.complete, aes(x = discharge.mean)) +
   geom_histogram(binwidth = 10) + 
   scale_x_continuous(limits = c(0, 500))
@@ -176,14 +176,14 @@ ggplot(USGS.flow.data.complete) +
 An alternate to a histogram is a frequency polygon graph (distributions of values for continuous numerical variables). Instead of displaying bars,  counts of continuous variables are displayed as lines. This is advantageous if you want to display multiple variables or categories of variables at once.
 
 ```{r, fig.height = 3, fig.width = 4}
-#
+# create three geom_freqpoly data series
 ggplot(USGS.flow.data.complete) +
-  geom_freqpoly(aes(x = gage.height.mean), bins = 50) +
+  geom_freqpoly(aes(x = gage.height.mean), bins = 50) + # color black by default
   geom_freqpoly(aes(x = gage.height.min), bins = 50, color = "blue") +
   geom_freqpoly(aes(x = gage.height.max), bins = 50, color = "red") +
   scale_x_continuous(limits = c(0, 10))
 
-#
+# color this plot by its stats status
 ggplot(USGS.flow.data.complete) +
   geom_freqpoly(aes(x = gage.height.mean, color = gage.height.mean.approval), bins = 50) +
   scale_x_continuous(limits = c(0, 10)) +
@@ -209,11 +209,11 @@ An alternate option is a violin plot, which displays density distributions, some
 ggplot(USGS.flow.data.complete) +
   geom_boxplot(aes(x = gage.height.mean.approval, y = gage.height.mean))
 
-#
+# group by the increment of gage.height difference of 1, the higer the river, the more water will flow through
 ggplot(USGS.flow.data.complete) +
   geom_boxplot(aes(x = gage.height.mean, y = discharge.mean, group = cut_width(gage.height.mean, 1)))
 
-#
+# the number of certain range of data, the wider indicates the more data
 ggplot(USGS.flow.data.complete) +
   geom_violin(aes(x = gage.height.mean.approval, y = gage.height.mean), draw_quantiles = c(0.25, 0.5, 0.75))
 ```
