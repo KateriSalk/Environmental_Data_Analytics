@@ -70,7 +70,7 @@ Formatting of dates in R:
 %b  abbreviated month
 %B  unabbreviated month
 
-In some cases when dates are provided as integers, you may need to provide an origin for your dates. Beware: the "origin" date for Excel (Windows), Excel (Mac), R, and MATLAB all have different origin dates. Google this if it comes up.
+In some cases when dates are provided as integers, you may need to provide an origin for your dates. Beware: the "origin" date for Excel (Windows), Excel (Mac), R, and MATLAB all have different origin dates. Google this if it comes up. 
 
 ```{r}
 help(as.Date)

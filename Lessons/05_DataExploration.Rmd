@@ -126,7 +126,7 @@ summary(USGS.flow.data$gage.height.mean)
 ```
 
 What happened to blank cells in the spreadsheet when they were imported into R?
-> ANSWER: 
+> ANSWER: They automatically become NA
 
 ## TIPS AND TRICKS: SPREADSHEETS
 
