@@ -4,7 +4,7 @@
 ## The code contains numerous mistakes and errors, which you are tasked with fixing.
 ## Instructions listed in comments throughout the script.
 
-#### Setup ----
+#### Setup ---- not everybody's laptop is setup this way; it's better to go to the Session menu in RStudio and navigating to the Set Working Directory tab.
 setwd("/Users/katerisalk/Documents/Duke/Courses/Environmental_Data_Analytics")
 
 library("tidyverse")

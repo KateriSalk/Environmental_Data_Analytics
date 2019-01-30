@@ -92,10 +92,11 @@ USGS.flow.data$datetime <- as.Date(USGS.flow.data$datetime, format = "%m/%d/%y")
 Note that for every date prior to 1969, R has assigned the date in the 2000s rather than the 1900s. This can be fixed with an `ifelse` statement inside a function. Run through the code below and write what is happening in the comment above each line.
 
 ```{r}
-# 
+# first remove the "20" in front of the number
 USGS.flow.data$datetime <- format(USGS.flow.data$datetime, "%y%m%d")
 
-#
+# create a function, if it is > 181231, which means that if it's greater put 19, if smaller than 181231 then put 20; 
+# paste: it will take the two functions inside and put them together; 
 create.early.dates <- (function(d) {
        paste0(ifelse(d > 181231,"19","20"),d)
        })
@@ -117,16 +118,18 @@ summary(USGS.flow.data$gage.height.mean)
 ```
 Question: What types of research questions might make it favorable to remove NAs from a dataset, and what types of research questions might make it favorable to retain NAs in the dataset?
 
-> Answer: 
+> Answer: Remove NAs - true NA (people's answer is actually NA = not available) and missing data
 
 ```{r}
-USGS.flow.data.complete <- na.omit(USGS.flow.data)
-dim(USGS.flow.data)
+USGS.flow.data.complete <- na.omit(USGS.flow.data) # if there's any NA in that row, it removes the whole row
+dim(USGS.flow.data)   
 dim(USGS.flow.data.complete)
 
 mean(USGS.flow.data.complete$discharge.mean)
 sd(USGS.flow.data.complete$discharge.mean)
 summary(USGS.flow.data.complete$discharge.mean)
+
+complete.cases(USGS.flow.data) 
 
 ```
 
