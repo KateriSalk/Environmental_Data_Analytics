@@ -1,7 +1,9 @@
 ---
-title: "Assignment 3: Data Exploration"
+title: 'Assignment 3: Data Exploration'
 author: "Xin Zhang"
-output: pdf_document
+output:
+  pdf_document: default
+  word_document: default
 geometry: margin=2.54cm
 ---
 
@@ -29,14 +31,19 @@ The completed exercise is due on Thursday, 31 January, 2019 before class begins.
 
 Check your working directory, load necessary packages (tidyverse), and upload the North Temperate Lakes long term monitoring dataset for the light, temperature, and oxygen data for three lakes (file name: NTL-LTER_Lake_ChemistryPhysics_Raw.csv). Type your code into the R chunk below.
 ```{r}
-
+#check working directory
+getwd()
+#load package
+library(tidyverse)
+#upload the dataset
+TempLakes.monitor.data <- read.csv("../Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
 ```
 
 ## 2) Learn about your system
 
 Read about your dataset in the NTL-LTER README file. What are three salient pieces of information you gained from reading this file?
 
-> ANSWER: 
+> ANSWER: (1) This dataset contains data from studies on several lakes in the North Temperate Lakes District in Wisconsin, USA from 1984 to 2016 and it includes the following data contents: names, sample depths, date, temperature,physical and chemical limnology indicators and etc. (2) This dataset comes from the North Temperate Lakes Long Term Ecological Research website https://lter.limnology.wisc.edu/data.Four selctions were made to select the data we need. (3) Data were accessed 2018-12-06. 
 
 ## 3) Obtain basic summaries of your data
 
@@ -49,27 +56,38 @@ Write R commands to display the following information:
 5. summary of lakename, depth, and temperature
 
 ```{r}
-# 1
+# 1 Demnsions
+dim(TempLakes.monitor.data)
 
-# 2
+# 2 class
+class(TempLakes.monitor.data)
 
-# 3
+# 3 first 8 rows
+head(TempLakes.monitor.data, 8) 
 
-# 4
+# 4 class of lakename, sampledate, depth and temperature
+class(TempLakes.monitor.data$lakename)
+class(TempLakes.monitor.data$sampledate)
+class(TempLakes.monitor.data$depth)
+class(TempLakes.monitor.data$temperature_C)
 
-# 5
-
+# 5 summary of lakename, depth and temperature
+summary(TempLakes.monitor.data$lakename)
+summary(TempLakes.monitor.data$depth)
+summary(TempLakes.monitor.data$temperature_C)
 ```
 
 Change sampledate to class = date. After doing this, write an R command to display that the class of sammpledate is indeed date. Write another R command to show the first 10 rows of the date column. 
 
 ```{r}
-
+TempLakes.monitor.data$sampledate  <- as.Date(TempLakes.monitor.data$sampledate, format = "%m/%d/%y") 
+class(TempLakes.monitor.data$sampledate)
+head(TempLakes.monitor.data$sampledate, 10) 
 ```
 
 Question: Do you want to remove NAs from this dataset? Why or why not?
 
-> ANSWER: 
+> ANSWER: There is a column named 'comments' and all values in it are NA, if i use na.omit(), it will delete all the rows. And, when using ggplot for graphs, it will automatically remove the NAs in the variables we use. Therefore, I will not remove the NAs. However, if there is analysis that needs me to remove some specific NAs, I will work on it. At this point, i would say, I will not use na.omit to delete all my data.
 
 
 ## 4) Explore your data graphically
@@ -84,32 +102,52 @@ Write R commands to display graphs depicting:
 6. Boxplot of temperature based on depth, with depth divided into 0.25 m increments
 7. Scatterplot of temperature by depth
 
-```{r}
+```{r, fig.height = 6, fig.width = 10}
 # 1
+#if 'temperature counts' means the total number of temperature records for each lake
+ggplot(TempLakes.monitor.data[!is.na(TempLakes.monitor.data$temperature_C), ], aes(x = lakename)) +
+  geom_bar()
+#if 'temperature counts' means the number of each temperatue at each lake
+ggplot(TempLakes.monitor.data, aes(x = TempLakes.monitor.data$temperature_C, color = lakename )) +
+  geom_bar()
+
 
 # 2
+ggplot(TempLakes.monitor.data) +
+  geom_histogram(aes(x = temperature_C))
 
 # 3
+ggplot(TempLakes.monitor.data) +
+  geom_histogram(aes(x = temperature_C),bins=20)
 
 # 4
 
+ggplot(TempLakes.monitor.data) +
+  geom_freqpoly(aes(x = temperature_C, color = lakename), bins = 20) + theme(legend.position = "top")
+
 # 5
+ggplot(TempLakes.monitor.data) +
+  geom_boxplot(aes(x = lakename, y = temperature_C))
 
 # 6
+ggplot(TempLakes.monitor.data) +
+  geom_boxplot(aes(x = depth, y = temperature_C, group = cut_width(depth, 0.25)))
 
 # 7 
+ggplot(TempLakes.monitor.data) +
+  geom_point(aes(x = depth, y = temperature_C))
 
 ```
 ## 5) Form questions for further data analysis
 
 What did you find out about your data from the basic summaries and graphs you made? Describe in 4-6 sentences.
 
-> ANSWER: 
+> ANSWER: There are 9 temperate lakes in total in Wisconsin from 1984 to 2016 and Peter Lake has the most records. The lake depth ranged from 0 to 20 and the mean depth is 4.39; the temperature ranged from 0.3 to 34.1, the mean temperature is 11.81 and there was 3858 records of missing temperature. The most frequent showed temperature was around 5 Celsius, and temperature distribution showed two peaks, one at 5 and another at 22.These nine temperate lakes had similar temperature distribution pattern, and each lake's most temeprature records ranged around 5 to 22, but there were some outliers at each lake's records. When sample depth of the lake increased, the temperature decreased, and when the depth increased to more than 10, the temperature droped more slowly and reamained around 5 Celsius.
 
 What are 3 further questions you might ask as you move forward with  analysis of this dataset?
 
-> ANSWER 1: 
+> ANSWER 1: Is there any relation between temperature and dissolved Oxygen, when temperature increases, would dissolved Oxygen change in certain trend?
 
-> ANSWER 2: 
+> ANSWER 2: Is there any relation between depth and dissolved Oxygen, when depth increases, would dissolved Oxygen change in certain trend?
 
-> ANSWER 3: 
+> ANSWER 3:  Is there any temperature change trend in time series of 1984 to 2016 in each lake?
