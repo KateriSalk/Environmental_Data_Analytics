@@ -5,6 +5,8 @@ output:
   pdf_document: default
   word_document: default
 geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## OVERVIEW
