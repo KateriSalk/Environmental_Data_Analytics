@@ -117,32 +117,32 @@ Write R commands to display graphs depicting:
 threelakes_temp <- select(monitoring_threelakes, "lakename", "temperature_C")
 threelakes_complete <- na.omit(threelakes_temp)
 
-# 1 Bar chart of temperature counts for each lake
+# 1 Create a bar chart of temperature counts for each lake
 ggplot(threelakes_complete, aes(x = lakename)) +
  geom_bar()
 
-# 2 Histogram of count distributions of temperature (all temp measurements together)
+# 2 Create a histogram of count distributions of temperature (all temp measurements together)
 ggplot(threelakes_complete) +
  geom_histogram(aes(x = lakename), stat = "count")
 
-# # 3 Change histogram from 2 to have a different number or width of bins
+# 3 Change histogram from 2 to have a different number or width of bins
 ggplot(threelakes_complete) +
   geom_histogram(aes(x = lakename), stat = "count",
                  bins = 60 )
 
-# 4 Frequency polygon of temperature for each lake. Choose different colors for each lake.
+# 4 Create a frequency polygon of temperature for each lake. Choose different colors for each lake.
 ggplot(threelakes_complete) +
   geom_freqpoly(aes(x = temperature_C, color = lakename))
 
-# 5 Boxplot of temperature for each lake
+# 5 Create a boxplot of temperature for each lake
 ggplot(threelakes_complete) +
   geom_boxplot(aes(x = lakename, y = temperature_C))
 
-# 6 Boxplot of temperature based on depth, with depth divided into 0.25 m increments
+# 6 Create a boxplot of temperature based on depth, with depth divided into 0.25 m increments
 ggplot(monitoring_threelakes) +
   geom_boxplot(aes(x = depth, y = temperature_C, group = cut_width(depth, 0.25)))
 
-# 7 Scatterplot of temperature by depth
+# 7 Create a scatterplot of temperature by depth
 ggplot(monitoring_threelakes) +
   geom_point(aes(x = depth, y = temperature_C))
 
@@ -152,12 +152,12 @@ ggplot(monitoring_threelakes) +
 
 What did you find out about your data from the basic summaries and graphs you made? Describe in 4-6 sentences.
 
-> ANSWER: 
+> ANSWER: According to the histogram, Paul lake and Peter lake are two lakes that have the most temperature data. Across the nine lakes, shown by the frequency graph, the highest frequency of temperature is around 4-5 degree Celsius. According to the box plot, nine lakes have various average temperature, ranging from 6-7 degree Celsius to 17-18 degree Celsius. And the scatterplot reflects that as depth increases, temperature decreases.
 
 What are 3 further questions you might ask as you move forward with  analysis of this dataset?
 
-> ANSWER 1: 
+> ANSWER 1: Do all the lakes have similar pattern of the relationship between temperature and depth?
 
-> ANSWER 2: 
+> ANSWER 2: What's the relationship between depth and dissolved oxygen?
 
-> ANSWER 3: 
+> ANSWER 3: What's the relationship between temperature and dissolved oxygen?
