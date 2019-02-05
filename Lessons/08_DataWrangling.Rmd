@@ -29,28 +29,29 @@ head(NTL.phys.data.PeterPaul)
 colnames(NTL.phys.data.PeterPaul)
 dim(NTL.phys.data.PeterPaul)
 summary(NTL.phys.data.PeterPaul$comments)
-class(NTL.phys.data.PeterPaul$sampledate)
+class(NTL.phys.data.PeterPaul$sampledate) #usually R will not load date as date, but as factor
 
 # Format sampledate as date
 NTL.phys.data.PeterPaul$sampledate <- as.Date(NTL.phys.data.PeterPaul$sampledate, format = "%m/%d/%y")
 
 # Select Peter and Paul Lakes from the nutrient dataset
-NTL.nutrient.data.PeterPaul <- filter(NTL.nutrient.data, lakename == "Paul Lake" | lakename == "Peter Lake")
+NTL.nutrient.data.PeterPaul <- filter(NTL.nutrient.data, lakename == "Paul Lake" | lakename == "Peter Lake") # filter selects rows, select selects columns
 
 # Data summaries for nutrient data
 head(NTL.nutrient.data.PeterPaul)
 colnames(NTL.nutrient.data.PeterPaul)
 dim(NTL.nutrient.data.PeterPaul)
-summary(NTL.nutrient.data.PeterPaul$comments)
+summary(NTL.nutrient.data.PeterPaul$comments) # We have filtered out the other lakes, but it still keep the information e.g. comment for other lakes here
 class(NTL.nutrient.data.PeterPaul$sampledate)
 NTL.nutrient.data.PeterPaul$sampledate <- as.Date(NTL.nutrient.data.PeterPaul$sampledate, format = "%m/%d/%y")
 
 # Save processed nutrient file
-write.csv(NTL.nutrient.data.PeterPaul, row.names = FALSE, file = "./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaul_Processed.csv")
+write.csv(NTL.nutrient.data.PeterPaul, row.names = FALSE, file = "./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaul_Processed.csv") #if there is a file has same name, it just gonna overwrite it
 
 # Remove columns that are not of interest for analysis
 NTL.phys.data.PeterPaul.skinny <- select(NTL.phys.data.PeterPaul, 
                                          lakename, daynum, year4, sampledate:irradianceDeck)
+#when using select, can put '-' before the variable to remove it when selecting
   
 NTL.nutrient.data.PeterPaul.skinny <- select(NTL.nutrient.data.PeterPaul, 
                                              lakename, daynum, year4, sampledate, depth:po4)
@@ -69,7 +70,7 @@ However, there may be situations where we want to reshape our dataset, for examp
 
 ```{r}
 # Gather nutrient data into one column
-NTL.nutrient.data.PeterPaul.gathered <- gather(NTL.nutrient.data.PeterPaul.skinny, "nutrient", "concentration", tn_ug:po4)
+NTL.nutrient.data.PeterPaul.gathered <- gather(NTL.nutrient.data.PeterPaul.skinny, "nutrient", "concentration", tn_ug:po4) #':' means through, gather function gather two datafrem by the selected columns toghter, and the total rows increase, multily the original dataset down
 NTL.nutrient.data.PeterPaul.gathered <- subset(NTL.nutrient.data.PeterPaul.gathered, !is.na(concentration))
 count(NTL.nutrient.data.PeterPaul.gathered, nutrient)
 
@@ -101,6 +102,7 @@ Let's say we want to generate a new dataset that contains all possible physical 
 ```{r}
 
 NTL.phys.nutrient.data.PeterPaul <- full_join(NTL.phys.data.PeterPaul.skinny, NTL.nutrient.data.PeterPaul.skinny)
+#warning message: lakename will different levels
 
 write.csv(NTL.phys.nutrient.data.PeterPaul, row.names = FALSE, 
           file ="./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
@@ -114,6 +116,7 @@ A package that makes coercing date much easier is `lubridate`. A guide to the pa
 ```{r}
 #install.packages(lubridate)
 library(lubridate)
+#there is function date from base package, and from this point, it will use the funciton from lubridate
 
 # add a month column to the dataset
 NTL.phys.nutrient.data.PeterPaul <- mutate(NTL.phys.nutrient.data.PeterPaul, month = month(sampledate)) 
@@ -143,6 +146,7 @@ NTL.PeterPaul.summaries <-
             sdTN = sd(tn_ug), 
             meanTP = mean(tp_ug), 
             sdTP = sd(tp_ug))
+#you can run any summary option at this point
 
 write.csv(NTL.PeterPaul.summaries, row.names = FALSE, 
           file ="./Data/Processed/NTL-LTER_Lake_Summaries_PeterPaul_Processed.csv")
@@ -152,3 +156,4 @@ write.csv(NTL.PeterPaul.summaries, row.names = FALSE,
 ## ALTERNATIVE METHODS FOR DATA WRANGLING
 
 If you want to iteratively perform operations on your data, there exist several options. We have demonstrated the pipe as one option. Additional options include the `apply` function (https://www.rdocumentation.org/packages/base/versions/3.5.2/topics/apply) and `for` loops (https://swcarpentry.github.io/r-novice-inflammation/15-supp-loops-in-depth/). These options are good options as well (again, multiple ways to get to the same outcome). A word of caution: loops are slow. This may not make a difference for small datasets, but small time additions will make a difference with large datasets.
+
