@@ -160,7 +160,8 @@ o3_pm25_1718.summary.site <-
             max_pm2.5 = max(PM2.5))
 
 #13
-
+view(o3_pm25_1718.summary.month)
+view(o3_pm25_1718.summary.site)
 
 ```
 
