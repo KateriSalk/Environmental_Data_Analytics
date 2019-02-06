@@ -1,6 +1,6 @@
 ---
 title: "Assignment 4: Data Wrangling"
-author: "Student Name"
+author: "Xin Zhang"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -34,8 +34,37 @@ The completed exercise is due on Thursday, 7 February, 2019 before class begins.
 
 ```{r}
 #1
+getwd()
+library(tidyverse)
+EPA_O3_NC2017 <- read.csv("./Data/Raw/EPAair_O3_NC2017_raw.csv")
+EPA_O3_NC2018 <- read.csv("./Data/Raw/EPAair_O3_NC2018_raw.csv")
+EPA_pm25_NC2017 <- read.csv("./Data/Raw/EPAair_PM25_NC2017_raw.csv")
+EPA_pm25_NC2018 <- read.csv("./Data/Raw/EPAair_PM25_NC2018_raw.csv")
 
 #2
+#data summaries for O3 2017
+head(EPA_O3_NC2017)
+colnames(EPA_O3_NC2017)
+dim(EPA_O3_NC2017)
+summary(EPA_O3_NC2017)
+
+#data summaries for O3 2018
+head(EPA_O3_NC2018)
+colnames(EPA_O3_NC2018)
+dim(EPA_O3_NC2018)
+summary(EPA_O3_NC2018)
+
+#data summaries for PM2.5 2017
+head(EPA_pm25_NC2017)
+colnames(EPA_pm25_NC2017)
+dim(EPA_pm25_NC2017)
+summary(EPA_pm25_NC2017)
+
+#data summaries for PM2.5 2018
+head(EPA_pm25_NC2018)
+colnames(EPA_pm25_NC2018)
+dim(EPA_pm25_NC2018)
+summary(EPA_pm25_NC2018)
 ```
 
 ## Wrangle individual datasets to create processed files.
@@ -46,6 +75,10 @@ The completed exercise is due on Thursday, 7 February, 2019 before class begins.
 
 ```{r}
 #3
+class(EPA_O3_NC2017$Date)
+class(EPA_O3_NC2018$Date)
+class(EPA_pm25_NC2017$Date)
+class(EPA_pm25_NC2018$Date)
 
 #4
 
@@ -82,7 +115,7 @@ The completed exercise is due on Thursday, 7 February, 2019 before class begins.
 ## Generate summary tables
 12. Use the split-apply-combine strategy to generate two new data frames: 
 a. A summary table of mean AQI values for O3 and PM2.5 by month
-b. A summary table of the mean, minimum, and maximum concentrations of O3 and PM2.5 for each site
+b. A summary table of the mean, minimum, and maximum AQI values of O3 and PM2.5 for each site
 13. Display the data frames.
 
 ```{r}
