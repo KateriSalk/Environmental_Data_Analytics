@@ -1,6 +1,6 @@
 ---
 title: "Assignment 4: Data Wrangling"
-author: "Student Name"
+author: "Connie Xiong"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -33,9 +33,37 @@ The completed exercise is due on Thursday, 7 February, 2019 before class begins.
 2. Generate a few lines of code to get to know your datasets (basic data summaries, etc.).
 
 ```{r}
-#1
+#1 check the working directory, load the correct package, as well as raw data files
+getwd()
+library(tidyverse)
+O3_2017 <- read.csv("./Data/Raw/EPAair_O3_NC2017_raw.csv")
+O3_2018 <- read.csv("./Data/Raw/EPAair_O3_NC2018_raw.csv")
+pm25_2017 <- read.csv("./Data/Raw/EPAair_PM25_NC2017_raw.csv")
+pm25_2018 <- read.csv("./Data/Raw/EPAair_PM25_NC2018_raw.csv")
 
-#2
+#2 Understand what's in the dataset and basic information
+
+head(O3_2017)
+colnames(O3_2017)
+summary(O3_2017)
+dim(O3_2017)
+
+head(O3_2018)
+colnames(O3_2018)
+summary(O3_2018)
+dim(O3_2018)
+
+head(pm25_2017)
+colnames(pm25_2017)
+summary(pm25_2017)
+dim(pm25_2017)
+
+
+head(pm25_2018)
+colnames(pm25_2018)
+summary(pm25_2018)
+dim(pm25_2018)
+
 ```
 
 ## Wrangle individual datasets to create processed files.
@@ -45,13 +73,27 @@ The completed exercise is due on Thursday, 7 February, 2019 before class begins.
 6. Save all four processed datasets in the Processed folder.
 
 ```{r}
-#3
+#3 Make sure R recognize the date in the datasets are date
+O3_2017$Date <- as.Date(O3_2017$Date, format = "%m/%d/%y")
+O3_2018$Date <- as.Date(O3_2018$Date, format = "%m/%d/%y")
+pm25_2017$Date <- as.Date(pm25_2017$Date, format = "%m/%d/%y")
+pm25_2018$Date <- as.Date(pm25_2018$Date, format = "%m/%d/%y")
 
-#4
+#4 Select only the following columns: Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE
+O3_2017 <- select(O3_2017, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+O3_2018 <- select(O3_2018, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+pm25_2017 <- select(pm25_2017, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+pm25_2018 <- select(pm25_2018, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
 
-#5
+#5 For the PM2.5 datasets, fill all cells in AQS_PARAMETER_DESC with "PM2.5" (all cells in this column should be identical)
+pm25_2017$AQS_PARAMETER_DESC <- "PM2.5"
+pm25_2018$AQS_PARAMETER_DESC <- "PM2.5"
 
-#6
+#6 Export all four air data as csv in the processed data folder
+write.csv(O3_2017, row.names = FALSE, "./Data/Processed/EPAair_O3_2017_processed.csv")
+write.csv(O3_2018, row.names = FALSE, "./Data/Processed/EPAair_O3_2018_processed.csv")
+write.csv(pm25_2017, row.names = FALSE, "./Data/Processed/EPAair_pm25_2017_processed.csv")
+write.csv(pm25_2018, row.names = FALSE, "./Data/Processed/EPAair_pm25_2018_processed.csv")
 
 ```
 
@@ -68,13 +110,24 @@ The completed exercise is due on Thursday, 7 February, 2019 before class begins.
 11. Save your processed dataset with the following file name: "EPAair_O3_PM25_NC1718_Processed.csv"
 
 ```{r}
-#8
+#7 Combine all four datasets into one
+o3_pm25_1718 <- rbind(O3_2017, O3_2018, pm25_2017, pm25_2018)
 
-#9
+#8 Select only 3 sites: Blackstone, Bryson City, Triple Oak; and add two new columns of their month and year
+o3_pm25_1718 <- 
+  o3_pm25_1718 %>%
+  filter(Site.Name == "Blackstone" | Site.Name == "Bryson City" | Site.Name == "Triple Oak") %>%
+  mutate(Month = month(Date)) %>%
+  mutate(Year = year(Date))
 
-#10
+#9 Separate the column that is currently filled with ozone and PM2.5 into two separate columns; basically you grabbed the values under the two columns
+o3_pm25_1718.spread <- spread(o3_pm25_1718, AQS_PARAMETER_DESC, DAILY_AQI_VALUE)
 
-#11
+#10 Look up the dimension of the new processed data
+dim(o3_pm25_1718.spread)
+
+#11 Export the data to csv file
+write.csv(o3_pm25_1718.spread, row.names = FALSE,    "./Data/Processed/EPAair_O3_PM25_NC1718_Processed.csv")
 
 ```
 
@@ -86,11 +139,28 @@ b. A summary table of the mean, minimum, and maximum AQI values of O3 and PM2.5 
 13. Display the data frames.
 
 ```{r}
-#12a
+#12a 
+o3_pm25_1718.summary.month <-
+  o3_pm25_1718.spread %>%
+  group_by(Month) %>%
+  filter(!is.na(Ozone) & !is.na(PM2.5)) %>%
+  summarise(mean_o3 = mean(Ozone),
+            mean_pm2.5 = mean(PM2.5))
 
 #12b
+o3_pm25_1718.summary.site <-
+  o3_pm25_1718.spread %>%
+  group_by(Site.Name) %>%
+  filter(!is.na(Ozone) & !is.na(PM2.5)) %>%
+  summarise(mean_o3 = mean(Ozone),
+            mean_pm2.5 = mean(PM2.5),
+            min_o3 = min(Ozone),
+            min_pm2.5 = min(PM2.5),
+            max_o3 = max(Ozone),
+            max_pm2.5 = max(PM2.5))
 
 #13
+
 
 ```
 

@@ -35,6 +35,7 @@ class(NTL.phys.data.PeterPaul$sampledate)
 NTL.phys.data.PeterPaul$sampledate <- as.Date(NTL.phys.data.PeterPaul$sampledate, format = "%m/%d/%y")
 
 # Select Peter and Paul Lakes from the nutrient dataset
+# filter select rows, and select select columns
 NTL.nutrient.data.PeterPaul <- filter(NTL.nutrient.data, lakename == "Paul Lake" | lakename == "Peter Lake")
 
 # Data summaries for nutrient data
@@ -45,13 +46,20 @@ summary(NTL.nutrient.data.PeterPaul$comments)
 class(NTL.nutrient.data.PeterPaul$sampledate)
 NTL.nutrient.data.PeterPaul$sampledate <- as.Date(NTL.nutrient.data.PeterPaul$sampledate, format = "%m/%d/%y")
 
+summary(NTL.nutrient.data.PeterPaul$lakename)
+test <- droplevels(NTL.nutrient.data.PeterPaul) # only keep the peter and paul 
+
 # Save processed nutrient file
+# rol names = false coz we don't want to save the most left column that's from 1 to ...
 write.csv(NTL.nutrient.data.PeterPaul, row.names = FALSE, file = "./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaul_Processed.csv")
 
 # Remove columns that are not of interest for analysis
 NTL.phys.data.PeterPaul.skinny <- select(NTL.phys.data.PeterPaul, 
                                          lakename, daynum, year4, sampledate:irradianceDeck)
-  
+# we can just add "-" in front of the columns we wanna remove
+NTL.phys.data.PeterPaul.skinny <- select(NTL.phys.data.PeterPaul, 
+                                         -lakename, -daynum, -year4, -sampledate:irradianceDeck)
+
 NTL.nutrient.data.PeterPaul.skinny <- select(NTL.nutrient.data.PeterPaul, 
                                              lakename, daynum, year4, sampledate, depth:po4)
 ```
@@ -70,6 +78,7 @@ However, there may be situations where we want to reshape our dataset, for examp
 ```{r}
 # Gather nutrient data into one column
 NTL.nutrient.data.PeterPaul.gathered <- gather(NTL.nutrient.data.PeterPaul.skinny, "nutrient", "concentration", tn_ug:po4)
+# Remove the data that are missing in nutrient data
 NTL.nutrient.data.PeterPaul.gathered <- subset(NTL.nutrient.data.PeterPaul.gathered, !is.na(concentration))
 count(NTL.nutrient.data.PeterPaul.gathered, nutrient)
 
@@ -81,6 +90,7 @@ NTL.nutrient.data.PeterPaul.spread <- spread(NTL.nutrient.data.PeterPaul.gathere
 
 # Split components of cells into multiple columns
 # Opposite of 'separate' is 'unite'
+# this separate will NOT retain the original column, if you want to, you might need to mutate instead
 NTL.nutrient.data.PeterPaul.dates <- separate(NTL.nutrient.data.PeterPaul.skinny, sampledate, c("Y", "m", "d"))
 
 ```
@@ -112,7 +122,7 @@ write.csv(NTL.phys.nutrient.data.PeterPaul, row.names = FALSE,
 A package that makes coercing date much easier is `lubridate`. A guide to the package can be found at https://lubridate.tidyverse.org/. The cheat sheet within that web page is excellent too. This package can do many things (hint: look into this package if you are having unique date-type issues), but today we will be using two of its functions for our NTL dataset. 
 
 ```{r}
-#install.packages(lubridate)
+install.packages(lubridate)
 library(lubridate)
 
 # add a month column to the dataset
@@ -136,7 +146,7 @@ NTL.PeterPaul.summaries <-
   NTL.phys.nutrient.data.PeterPaul %>%
   filter(depth == 0) %>%
   group_by(lakename) %>%
-  filter(!is.na(temperature_C) & !is.na(tn_ug) & !is.na(tp_ug)) %>%
+  filter(!is.na(temperature_C) & !is.na(tn_ug) & !is.na(tp_ug)) %>% #it returns a situation where it remove even just one of these columns have na value 
   summarise(meantemp = mean(temperature_C), 
             sdtemp = sd(temperature_C), 
             meanTN = mean(tn_ug), 

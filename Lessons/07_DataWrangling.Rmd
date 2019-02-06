@@ -65,7 +65,7 @@ A few relevant commands:
 `<=`
 `>`
 `>=`
-`&`
+`&` the difference between these two?
 `|`
 
 ```{r}
@@ -89,11 +89,14 @@ dim(NTL.phys.data.surface3)
 
 # Choose multiple conditions to filter
 summary(NTL.phys.data$lakename)
-NTL.phys.data.PeterPaul1 <- filter(NTL.phys.data, lakename == "Paul Lake" | lakename == "Peter Lake")
+#choose lake names that have both paul lake and peter lake
+NTL.phys.data.PeterPaul1 <- filter(NTL.phys.data, lakename == "Paul Lake" | lakename == "Peter Lake")  
+#choose lake names that exclude the following items, use != and &
 NTL.phys.data.PeterPaul2 <- filter(NTL.phys.data, lakename != "Central Long Lake" & 
                                      lakename != "Crampton Lake" & lakename != "East Long Lake" &
                                      lakename != "Hummingbird Lake" & lakename != "Tuesday Lake" &
                                      lakename != "Ward Lake" & lakename != "West Long Lake")
+# %in% 
 NTL.phys.data.PeterPaul3 <- filter(NTL.phys.data, lakename %in% c("Paul Lake", "Peter Lake"))
 
 # Choose a range of conditions of a numeric or integer variable
@@ -106,14 +109,21 @@ NTL.phys.data.JunethruOctober4 <- filter(NTL.phys.data, daynum %in% c(152:304))
 # Exercise: 
 # filter NTL.phys.data for the year 1999
 # what code do you need to use, based on the class of the variable?
-class(NTL.phys.data$year4)
+class(NTL.phys.data$year4) # it is integer
+
+NTL.phys.data.1999 <- filter(NTL.phys.data, year4 == "1999")
+NTL.phys.data.year1999 <- filter(NTL.phys.data, year4 == 1999)
+
 
 # Exercise: 
 # filter NTL.phys.data for Tuesday Lake from 1990 through 1999.
 
+NTL.phys.data.Tuesdaylake1990.1999 <- filter(NTL.phys.data, year4 >= 1990 & 
+                                               year4 <= 1999 &
+                                               lakename == "Tuesday Lake")
 
 ```
-Question: Why don't we filter using row numbers?
+Question: Why don't we filter using row numbers?  #??
 
 > ANSWER: 
 
@@ -127,7 +137,10 @@ NTL.phys.data.depth.descending <- arrange(NTL.phys.data, desc(depth))
 
 # Exercise: 
 # Arrange NTL.phys.data by temperature, in descending order. 
+NTL.phys.data.temp.descend <- arrange(NTL.phys.data, desc(temperature_C))
 # Which dates, lakes, and depths have the highest temperatures?
+# 7/16/1998, East Long Lake, 0.5 m depth
+
 
 
 ```
@@ -137,6 +150,7 @@ Selecting allows us to choose certain columns (variables) in our dataset.
 
 ```{r}
 NTL.phys.data.temps <- select(NTL.phys.data, lakename, sampledate:temperature_C)
+# this is chooseing columns with lakename, and from sample data to temperature_C
 
 ```
 ### Mutate
@@ -144,7 +158,7 @@ NTL.phys.data.temps <- select(NTL.phys.data, lakename, sampledate:temperature_C)
 Mutating allows us to add new columns that are functions of existing columns. Operations include addition, subtraction, multiplication, division, log, and other functions.
 
 ```{r}
-
+#added a new column that has done something on a previous column
 NTL.phys.data.temps <- mutate(NTL.phys.data.temps, temperature_F = (temperature_C*9/5) + 32)
 
 ```
@@ -168,6 +182,8 @@ Notice that we did not place the dataset name inside the wrangling function but 
 ### Saving processed datasets
 
 ```{r}
+#why do we choose false for rolnames?
+
 write.csv(NTL.phys.data.PeterPaul1, row.names = FALSE, file = "./Data/Processed/NTL-LTER_Lake_ChemistryPhysics_PeterPaul_Processed.csv")
 ```
 
