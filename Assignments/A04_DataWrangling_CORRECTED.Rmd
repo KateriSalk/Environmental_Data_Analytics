@@ -1,9 +1,11 @@
 ---
-title: "Assignment 4: Data Wrangling"
+title: 'Assignment 4: Data Wrangling'
 author: "Connie Xiong"
-output: pdf_document
 geometry: margin=2.54cm
-editor_options: 
+output:
+  pdf_document: default
+  word_document: default
+editor_options:
   chunk_output_type: console
 ---
 
@@ -33,9 +35,12 @@ The completed exercise is due on Thursday, 7 February, 2019 before class begins.
 2. Generate a few lines of code to get to know your datasets (basic data summaries, etc.).
 
 ```{r}
+
 #1 check the working directory, load the correct package, as well as raw data files
+
 getwd()
 library(tidyverse)
+library(lubridate)
 O3_2017 <- read.csv("./Data/Raw/EPAair_O3_NC2017_raw.csv")
 O3_2018 <- read.csv("./Data/Raw/EPAair_O3_NC2018_raw.csv")
 pm25_2017 <- read.csv("./Data/Raw/EPAair_PM25_NC2017_raw.csv")
