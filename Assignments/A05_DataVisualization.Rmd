@@ -1,6 +1,6 @@
 ---
 title: "Assignment 5: Data Visualization"
-author: "Student Name"
+author: "Xin Zhang"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -34,7 +34,10 @@ The completed exercise is due on Thursday, 14 February, 2019 before class begins
 
 ```{r}
 #1
-
+getwd()
+library(tidyverse)
+PeterPaul.chem.phys <- read.csv("./Data/Processed/NTL-LTER_Lake_ChemistryPhysics_PeterPaul_Processed.csv")
+USGS
 #2
 ```
 ## Define your theme
