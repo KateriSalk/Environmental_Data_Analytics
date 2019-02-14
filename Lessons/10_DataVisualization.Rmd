@@ -41,12 +41,12 @@ print(O3plot1)
 
 O3plot2 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone)) +
-  theme_bw()
+  theme_bw() #box around the box and white bg
 print(O3plot2)
 
 O3plot3 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone)) +
-  theme_light()
+  theme_light() # no box outside compared to bw
 print(O3plot3)
 
 O3plot4 <- ggplot(EPAair) +
@@ -66,7 +66,7 @@ If you would like to set a common theme across all plots in your analysis sessio
 ```{r, fig.height = 3, fig.width = 4, warning = FALSE}
 mytheme <- theme_classic(base_size = 14) +
   theme(axis.text = element_text(color = "black"), 
-        legend.position = "top") #alternative: legend.position + legend.justification
+        legend.position = "top") #alternative: legend.position = c(1,1) + legend.justification = c(1,1))
 
 # options: call the theme in each plot or set the theme at the start. 
 
@@ -98,8 +98,8 @@ O3plot7 <- ggplot(EPAair, aes(x = Date, y = Ozone)) +
   geom_text(x = as.Date("2019-01-01"), y = 95, label = "moderate", hjust = 1, fontface = "bold") +
   scale_x_date(limits = as.Date(c("2017-01-01", "2018-12-31")), 
     date_breaks = "2 months", date_labels = "%b %y") +
-  ylab(expression("O"[3]* " AQI Value")) +
-  theme(axis.text.x = element_text(angle = 45,  hjust = 1))
+  ylab(expression("O"[3]* " AQI Value")) + # no definition for xaxis, it will take the Date (variable name) as the xaxis lable
+  theme(axis.text.x = element_text(angle = 45,  hjust = 1)) #angel - change xaxis label angle, hjust - move horizontally, move to the left
 print(O3plot7)  
 
 ```
@@ -119,7 +119,7 @@ Perception is key! Choose palettes that are visually pleasing and will communica
 #install.packages("RColorBrewer")
 #install.packages("colormap")
 library(viridis)
-library(RColorBrewer)
+library(RColorBrewer) # colorBrewer online can help show the cloar pattern
 library(colormap)
 
 scales::show_col(colormap(colormap = colormaps$viridis, nshades = 16))
@@ -136,12 +136,13 @@ print(NvsP)
 # change your axis labels to reflect TN and TP in micrograms per liter.
 # change your legend labels
 NvsP2 <-
-  ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth, shape = lakename)) +
+  ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, fill = depth, shape = lakename)) +
   geom_point(alpha = 0.8, size = 3) +
-  #xlab() +
-  #ylab() +
+  #xlab("Totoal Phosphorus (Microgram)(\U003BCg/L)") +
+  #ylab("Totoal Nitrogen (Microgram)") +
+  labs(x ="", y="", fill ="Depth, m", shape = "Lake")+
   # change your legend labels here
-  scale_shape_manual(values = c(15, 17)) +
+  scale_shape_manual(values = c(21, 23)) +
   #scale_color_distiller(palette = "Blues", direction = 1) + # use scale_color_brewer for discrete variables
   scale_color_viridis(option = "magma", direction = -1) +
   theme(legend.position = "right", 
@@ -155,9 +156,9 @@ Nutrientplot <-
   ggplot(PeterPaul.nutrients.gathered, aes(x = lakename, y = concentration, color = nutrient)) +
   geom_boxplot() +
 # place your additional edits here
-  scale_y_continuous(expand = c(0, 0)) +
+  #scale_y_continuous(expand = c(0, 0)) +
   #scale_color_brewer(palette = "YlGnBu") +
-  #scale_color_manual(values = c("#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84")) +
+  scale_color_manual(values = c("#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84")) +
   #scale_color_viridis(discrete = TRUE) +
   theme(legend.position = "right")
 print(Nutrientplot)
@@ -171,8 +172,8 @@ PMplot.faceted <-
   geom_point() +
   facet_grid(Site.Name ~ year) + 
   scale_x_continuous(breaks = c(1:12)) +
-  #theme(strip.background = element_rect(fill = "black"), strip.text = element_text(color = "white"))
-  ylab(expression("PM 2.5 AQI Value")) 
+  theme(strip.background = element_rect(fill = "black"), strip.text = element_text(color = "white"))
+  ylab(expression("PM 2.5 AQI Value")) +
 print(PMplot.faceted)
 
 ```
@@ -198,5 +199,5 @@ The `ggsave` function allows you to save plots in jpg, png, eps, pdf, tiff, and 
 * resolution (dpi)
 
 For example: 
-`ggsave("PMplot.jpg", PMplot.faceted,  path = "./Output/PMplotjpg", height = 4, width = 6, units = "in", dpi = 300)`
+`ggsave("PMplot.jpg", PMplot.faceted,  path = "./Output/PMplot.jpg", height = 4, width = 6, units = "in", dpi = 300)`
 
