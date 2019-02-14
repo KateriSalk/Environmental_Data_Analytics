@@ -22,7 +22,7 @@ library(tidyverse)
 PeterPaul.chem.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
 PeterPaul.nutrients.gathered <- read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
 PeterPaul.chem.nutrients.summaries <- read.csv("./Data/Processed/NTL-LTER_Lake_Summaries_PeterPaul_Processed.csv")
-EPAair2 <- read.csv("./Data/Processed/EPA_AQ_NC_Spread_processed.csv")
+EPAair <- read.csv("./Data/Processed/EPA_AQ_NC_Spread_processed.csv")
 EPAair$Date <- as.Date(EPAair$Date, format = "%Y-%m-%d")
 PeterPaul.chem.nutrients$sampledate <- as.Date(PeterPaul.chem.nutrients$sampledate, format = "%Y-%m-%d")
 
@@ -145,8 +145,8 @@ print(lightvsDOfixed)
 
 # Depth in the fields of limnology and oceanography is on a reverse scale
 tempvsdepth <- 
-  #ggplot(PeterPaul.chem.nutrients, aes(x = temperature_C, y = depth)) +
-  ggplot(PeterPaul.chem.nutrients, aes(x = temperature_C, y = depth, color = daynum)) +
+  ggplot(PeterPaul.chem.nutrients, aes(x = temperature_C, y = depth)) +
+  #ggplot(PeterPaul.chem.nutrients, aes(x = temperature_C, y = depth, color = daynum)) +
   geom_point() +
   scale_y_reverse()
 print(tempvsdepth)
@@ -154,18 +154,22 @@ print(tempvsdepth)
 
 NvsP <-
   ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth)) +
-  geom_point() #+
-  #geom_smooth(method = lm) +
-  #geom_abline(aes(slope = 16, intercept = 0))
+  geom_point() +
+  geom_smooth(method = lm) + #create a best fit linear line, create 95% confidence interval which shows as the grey area
+  geom_abline(aes(slope = 16, intercept = 0), lty = 2) 
 print(NvsP)
+#grey points mean there is tn_ug and tp_up but not depth
 
 # Exercise: Plot relationships between air quality measurements
 
 # 1. 
 # Plot AQI values for ozone by PM2.5, colored by site. 
 # Add a line of best fit for the linear regression of these variables.
+ ggplot(EPAair, aes(x = PM2.5, y = Ozone, color = Site.Name)) +
+  geom_point() + # or geom_point(aes(color = Site.Name))
+  geom_smooth(method = lm) #create a best fit linear line, create 95% confidence interval which shows as the grey area
+ 
 
-  
 ```
 
 ### Plotting continuous vs. categorical variables
@@ -173,7 +177,7 @@ print(NvsP)
 ```{r, fig.height = 3, fig.width = 4, warning = FALSE}
  # Barplot + error bars
 PeterPaul.nutrient.summaries <- PeterPaul.nutrients.gathered %>%
-  group_by(lakename, nutrient) %>%
+  group_by(lakename, nutrient) %>% # group by two variables 
   summarise(sd = sd(concentration), 
             mean = mean(concentration))
 
@@ -182,13 +186,15 @@ Nutrientplot <-
   geom_bar(aes(x = lakename, y = concentration, fill = as.factor(nutrient)), # why did we use fill?
            position = "dodge", stat = "summary", fun.y = "mean")             # what's happening here?
 print(Nutrientplot)
+# fill the inside color (color= can only color the outline), and at the same time to avoid they overlap on each other 
 
 Nutrientplot2 <- 
   ggplot(PeterPaul.nutrient.summaries, aes(x = lakename, y = mean, fill = as.factor(nutrient))) + #
-  geom_bar(stat = "identity", position = "dodge") + # what does the stat command do?
+  geom_bar(stat = "identity", position = "dodge") + # what does the stat command do? Becasue we've already has the mean column in our dataset, therfore we can use the identical value to draw the figure
   geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), # how do we specify error bars?
                  position = "dodge")
 print(Nutrientplot2)
+
 
 # Are there more effective ways to produce summary stats for categories?
 
@@ -202,7 +208,7 @@ print(Nutrientplot3)
 Nutrientplot4 <-
   ggplot(PeterPaul.nutrients.gathered, aes(x = lakename, y = concentration)) +
   geom_dotplot(aes(color = nutrient), binaxis = "y", binwidth = 1, 
-               stackdir = "center", position = "dodge") #
+               stackdir = "center", position = "dodge") #dodge avoids they overlap on each other
 print(Nutrientplot4)
 
 # Violin plot
@@ -233,7 +239,15 @@ print(Nutrientplot7)
 # 1. 
 # Create a bar chart plus standard deviation error bars for PM2.5, divided by year. 
 # Create separate bars for each site. 
+ EPAair2 <- EPAair %>%
+  group_by(year, Site.Name) %>% # group by two variables 
+  summarise(sd = sd(na.omit(PM2.5)), #na.rm = TRUE also works, !is.na() just gives you 1 and 0 cause it is a judegement statement
+            mean = mean(na.omit(PM2.5)))
 
+  ggplot(EPAair2, aes(x = as.factor(year), y = mean, fill = as.factor(Site.Name))) + #
+  geom_bar(position = "dodge", stat = "identity") +
+  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), position = "dodge") #geom_errorbar expects numbers
+  
 # 2. 
 # Create a new plot that better depicts the distribution of PM2.5 concentrations. 
 # Divide your graph by year and site.
