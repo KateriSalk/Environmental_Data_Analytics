@@ -78,13 +78,15 @@ ggplot(EPAair, aes(x = Ozone)) +
   geom_histogram(stat = "count")
 qqnorm(EPAair$Ozone); qqline(EPAair$Ozone)
 
-O3.onesample <- t.test(EPAair$Ozone, mu = 50, alternative = "less")
+O3.onesample <- t.test(EPAair$Ozone, mu = 50, alternative = "less") #regular t-test, two side, by idneticating less, it fits our research question
 O3.onesample
+# low p value, reject H0; t score, the extreamest, the greater possibility
+
 ```
 
 What information does the output give us? How might we report this information in a report?
 
-> ANWSER:
+> ANWSER: Ozone AQI values in 2017-2018 were significantlly less than 50 (one sample t-test; t=-41.9, df =1084, p<0.0001)
 
 ### Two-sample t-test
 The two-sample *t* test is used to test the hypothesis that the mean of two samples is equivalent. Unlike the one-sample tests, a two-sample test requires a second assumption that the variance of the two groups is equivalent. Are Ozone levels different between Blackstone and Bryson City?
@@ -93,6 +95,7 @@ The two-sample *t* test is used to test the hypothesis that the mean of two samp
 shapiro.test(EPAair$Ozone[EPAair$Site.Name == "Blackstone"])
 shapiro.test(EPAair$Ozone[EPAair$Site.Name == "Bryson City"])
 var.test(EPAair$Ozone ~ EPAair$Site.Name)
+#variance is not the same
 
 ggplot(EPAair, aes(x = Ozone, color = Site.Name)) +
   geom_freqpoly(stat = "count")
@@ -101,10 +104,13 @@ ggplot(EPAair, aes(x = Ozone, color = Site.Name)) +
 O3.twosample <- t.test(EPAair$Ozone ~ EPAair$Site.Name)
 O3.twosample
 O3.twosample$p.value
+# Low P value - Siginificant difference in the means in the two groups
+# y= Blackstone(38.48) +Bryson(35.18)+delta
 
 # Format as a GLM
 O3.twosample2 <- lm(EPAair$Ozone ~ EPAair$Site.Name)
 summary(O3.twosample2)
+#intercept is the first factor, the Blackstone
 ```
 ### Non-parametric equivalent of t-test: Wilcoxon test
 
@@ -115,6 +121,7 @@ O3.onesample.wilcox <- wilcox.test(EPAair$Ozone, mu = 50, alternative = "less")
 O3.onesample.wilcox
 O3.twosample.wilcox <- wilcox.test(EPAair$Ozone ~ EPAair$Site.Name)
 O3.twosample.wilcox
+#tell us there is differnece, but not clear where the difference is 
 ```
 
 ### One-way ANOVA
@@ -130,7 +137,8 @@ ggplot(EPAair, aes(x = PM2.5, color = Site.Name)) +
   geom_freqpoly(stat = "count")
 qqnorm(EPAair$PM2.5); qqline(EPAair$PM2.5)
 
-bartlett.test(EPAair$PM2.5 ~ EPAair$Site.Name)
+bartlett.test(EPAair$PM2.5 ~ EPAair$Site.Name) # two to test, barlett
+#there are not significantly differently
 
 # Format as a GLM
 PM2.5.anova <- lm(EPAair$PM2.5 ~ EPAair$Site.Name)
@@ -142,6 +150,7 @@ summary(PM2.5.anova2)
 
 # Run a post-hoc test for pairwise differences
 TukeyHSD(PM2.5.anova2)
+dev.off() #???
 
 # Plot the results
 # How might you edit this graph to make it attractive?
@@ -152,7 +161,7 @@ print(PM2.5.anova.plot)
 ```
 What information does the output give us? How might we report this information in a report?
 
-> ANSWER:
+> ANSWER: (ANOVA; F=16.16, df = 1898, P <0.0001)
 
 ### Non-parametric equivalent of ANOVA: Kruskal-Wallis Test
 As with the Wilcoxon test, the Kruskal-Wallis test is the non-parametric counterpart to the one-way ANOVA. Here, the data from two or more independent samples are replaced with their ranks without regard to the grouping AND based on the between-group sum of squares calculations. 
@@ -178,6 +187,7 @@ A two-way ANOVA allows us to examine the effects of two categorical explanatory 
 ```{r}
 TNanova.main <- lm(PeterPaul.nutrients$tn_ug ~ PeterPaul.nutrients$lakename + PeterPaul.nutrients$depth_id)
 summary(TNanova.main)
+#TN = 309.39, Paul lake, depth id 1
 
 TNanova.main2 <- aov(PeterPaul.nutrients$tn_ug ~ PeterPaul.nutrients$lakename + PeterPaul.nutrients$depth_id)
 summary(TNanova.main2)
