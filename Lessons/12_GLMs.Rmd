@@ -35,7 +35,7 @@ theme_set(mytheme)
 ## SIMPLE AND MULTIPLE LINEAR REGRESSION
 The linear regression, like the t-test and ANOVA, is a special case of the **generalized linear model** (GLM). A linear regression is comprised of a continuous response variable, plus a combination of 1+ continuous response variables (plus the error term). The deterministic portion of the equation describes the response variable as lying on a straight line, with an intercept and a slope term. The equation is thus a typical algebraic expression: 
 $$ y = \alpha + \beta*x + \epsilon $$
-
+>R -1 to 1, close to 0, no strong corrolation, R^2, 0 to 1
 The goal for the linear regression is to find a **line of best fit**, which is the line drawn through the bivariate space that minimizes the total distance of points from the line. This is also called a "least squares" regression. The remainder of the variance not explained by the model is called the **residual error.** 
 
 The linear regression will test the null hypotheses that
@@ -57,10 +57,12 @@ summary(irradiance.regression)
 
 # Correlation
 cor.test(PeterPaul.chem.nutrients$irradianceWater, PeterPaul.chem.nutrients$depth)
+#R^2 - how much data explained
 ```
 Question: How would you report the results of this test (overall findings and report of statistical output)?
 
-> ANSWER: 
+> ANSWER: The irradiance is negatively correlated with depth (maybe more explanation of coefficients)
+> (linera Regression; R2=0.31, df=15449, p<0.0001)
 
 So, we see there is a significant negative correlation between irradiance and depth (lower light levels at greater depths), and that this model explains about 31 % of the total variance in irradiance. Let's visualize this relationship and the model itself. 
 
@@ -76,6 +78,7 @@ An exploratory option to visualize the model fit is to use the function `plot`. 
 
 ```{r, fig.height = 3, fig.width = 4}
 plot(irradiance.regression)
+
 ```
 
 The option best suited for communicating findings is to plot the explanatory and response variables as a scatterplot. 
@@ -84,7 +87,7 @@ The option best suited for communicating findings is to plot the explanatory and
 # Plot the regression
 irradiancebydepth <- 
   ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = irradianceWater)) +
-  #ylim(0, 2000) +
+  ylim(0, 2000) +
   geom_point() 
 print(irradiancebydepth) 
 ```
@@ -114,6 +117,13 @@ irradiancebydepth2 <-
 print(irradiancebydepth2)
 
 # Make the graph attractive
+ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = irradianceWater)) +
+    geom_point(alpha=0.2) + #80% transparent
+    scale_y_log10() +
+    scale_x_continuous(breaks = c(0, 2, 4, 6, 8, 10, 12))+
+    #geom_text() #add annotation
+    geom_smooth(method = 'lm', se = FALSE, color = "magenta")+
+  labs(x="Depth (m)", y="Water Irradiance (Units)")
 
 ```
 
@@ -147,7 +157,7 @@ library(corrplot)
 PeterPaulnutrients <- 
   PeterPaul.chem.nutrients %>%
   select(tn_ug:po4) %>%
-  na.omit()
+  na.omit() #to plot has to be no NA in dataset
 PeterPaulCorr <- cor(PeterPaulnutrients)
 corrplot(PeterPaulCorr, method = "ellipse")
 corrplot.mixed(PeterPaulCorr, upper = "ellipse")
@@ -181,7 +191,7 @@ summary(TNancova.main)
 # interaction effects
 TNancova.interaction <- lm(data = PeterPaul.chem.nutrients, tn_ug ~ lakename * depth)
 summary(TNancova.interaction)
-
+# 20(Pual, depth), if it is peter -48.42
 TNplot <- ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = tn_ug, color = lakename)) + 
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE) +
