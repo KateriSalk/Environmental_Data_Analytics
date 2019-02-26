@@ -1,6 +1,6 @@
 ---
 title: "Assignment 6: Generalized Linear Models"
-author: "Student Name"
+author: "Connie Xiong"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -34,8 +34,18 @@ The completed exercise is due on Tuesday, 26 February, 2019 before class begins.
 
 ```{r}
 #1
+getwd()
+library(tidyverse)
+
+ecotox <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Mortality_raw.csv")
+
+chem.phys <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
 
 #2
+mytheme <- theme_grey() +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "right")
+theme_set(mytheme)
 
 ```
 
@@ -49,32 +59,55 @@ Research question: Were studies on various neonicotinoid chemicals conducted in 
 5. Is there equal variance among the publication years for each chemical? Hint: var.test is not the correct function.
 
 ```{r}
-#3
+#3 Check how many chemicals are in the dataset
+str(ecotox$Chemical.Name)
 
-#4
+#4 Determine whether publication years associated with each chemical is well-approximated by a normal distribution; generate a frequency polygon to see the distribution of counts for each year
+shapiro.test(ecotox$Pub..Year[ecotox$Chemical.Name == "Acetamiprid"])
+shapiro.test(ecotox$Pub..Year[ecotox$Chemical.Name == "Clothianidin"])
+shapiro.test(ecotox$Pub..Year[ecotox$Chemical.Name == "Dinotefuran"])
+shapiro.test(ecotox$Pub..Year[ecotox$Chemical.Name == "Imidacloprid"])
+shapiro.test(ecotox$Pub..Year[ecotox$Chemical.Name == "Imidaclothiz"])
+shapiro.test(ecotox$Pub..Year[ecotox$Chemical.Name == "Nitenpyram"])
+shapiro.test(ecotox$Pub..Year[ecotox$Chemical.Name == "Nithiazine"])
+shapiro.test(ecotox$Pub..Year[ecotox$Chemical.Name == "Thiacloprid"])
+shapiro.test(ecotox$Pub..Year[ecotox$Chemical.Name == "Thiamethoxam"])
 
-#5
+year.freq <- ggplot(ecotox, aes(x = Pub..Year, color = Chemical.Name)) +
+         geom_freqpoly(stat = "count")
+print(year.freq)
+
+#5 Check whether there is an equal variance among the publication years for each chemical
+bartlett.test(ecotox$Pub..Year ~ ecotox$Chemical.Name)
 
 ```
 
 6. Based on your results, which test would you choose to run to answer your research question?
 
-> ANSWER: 
+> ANSWER: I would choose ANOVA test to answer the research question.
 
 7. Run this test below. 
 
 8. Generate a boxplot representing the range of publication years for each chemical. Adjust your graph to make it pretty.
 ```{r}
-#7
+#7 Run an ANOVA test for the research question
+pub.year.chemical.anova <- lm(ecotox$Pub..Year ~ ecotox$Chemical.Name)
+summary(pub.year.chemical.anova)
 
-#8
+#8 Generate a boxplot to represent the range publication years for each chemical
+plot.pub.year.anova <- 
+  ggplot(ecotox, aes(x = Chemical.Name, y = Pub..Year)) +
+  geom_violin(draw_quantiles = 0.5) +
+  xlab(expression("Chemical Name")) +
+  ylab(expression("Publication Year"))
+print(plot.pub.year.anova)
 
 ```
 
 
 9. How would you summarize the conclusion of your analysis? Include a sentence summarizing your findings and include the results of your test in parentheses at the end of the sentence. 
 
-> ANSWER: 
+> ANSWER: Research question: Studies on various neonicotinoid chemicals are conducted in different years(ANOVA; F = 33.21, DF = 1274, p < 0.0001).
 
 ## NTL-LTER test
 Research question: What is the best set of predictors for lake temperatures in July across the monitoring period at the North Temperate Lakes LTER? 
@@ -88,31 +121,52 @@ Research question: What is the best set of predictors for lake temperatures in J
 12. Run an AIC to determine what set of explanatory variables (year4, daynum, depth) is best suited to predict temperature. Run a multiple regression on the recommended set of variables. 
 
 ```{r}
-#11
+#11 Wrangle the data to prepare for AIC analysis
+tidy.chem.phys <-
+  chem.phys %>%
+  filter(daynum %in% (183:212)) %>%
+  select(lakename:daynum, depth, temperature_C) %>%
+  na.omit()
 
-#12
+#12 Run an AIC to determine which variable(s) are best predictor for temperature, then run a multiple regression on the recommmended set of variables
+temp.aic <-lm(data = tidy.chem.phys, temperature_C ~ year4 + daynum + depth)
+step(temp.aic)
+temp.model <- lm(data = tidy.chem.phys, temperature_C ~ year4 + daynum + depth)
+summary(temp.model)
 
 ```
 
 13. What is the final linear equation to predict temperature from your multiple regression? How much of the observed variance does this model explain?
 
-> ANSWER: 
+> ANSWER: The final linear equation is: temperature = -10.1 + 0.01 year4 + 0.04 daynum - 1.95 depth + 3.816. This model explains 74% of the variance observed.
 
 14. Run an interaction effects ANCOVA to predict temperature based on depth and lakename from the same wrangled dataset.
 
 ```{r}
-#14
+#14 Run an interaction effects ANCOVA to predict temperature based on depth and lakename
+ancova.temp <- lm(data = tidy.chem.phys, temperature_C ~ depth * lakename)
+summary(ancova.temp)
 
 ```
 
 15. Is there an interaction between depth and lakename? How much variance in the temperature observations does this explain?
 
-> ANSWER: 
+> ANSWER: There is an interaction between depth and lake name because there are six lakes showing that depth has a significant impact on the temperature of the lake and this is different among those lakes(ANCOVA; F = 2040, DF = 9401, p < 0.0001). This test explains 78% of the variance.
 
 16. Create a graph that depicts temperature by depth, with a separate color for each lake. Add a geom_smooth (method = "lm", se = FALSE) for each lake. Make your points 50 % transparent. Adjust your y axis limits to go from 0 to 35 degrees. Clean up your graph to make it pretty. 
 
 ```{r}
-#16
+#16 Create a graph that depicts temperature by depth
+lake.temp.depth <-
+  ggplot(tidy.chem.phys, aes(x = depth, y = temperature_C, color = lakename)) +
+  geom_point(alpha = 0.5) +
+  scale_color_brewer(palette = "Set1") +
+  geom_smooth(method = "lm", se = FALSE) +
+  ylim(0, 35) +
+  xlab(expression("Depth (m)")) +
+  ylab(expression("Temperature (celsius degree)")) +
+  labs(color = "Lake Name")
+print(lake.temp.depth)
 
 ```
 

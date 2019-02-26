@@ -86,7 +86,7 @@ write.csv(NTL.nutrient.data.PeterPaul.gathered, row.names = FALSE,
           file ="./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
 
 # Spread nutrient data into separate columns
-NTL.nutrient.data.PeterPaul.spread <- spread(NTL.nutrient.data.PeterPaul.gathered, nutrient, concentration)
+NTL.nutrient.data.PeterPaul.spread <- spread(PeterPaul.nutrients.gathered, nutrient, concentration)
 
 # Split components of cells into multiple columns
 # Opposite of 'separate' is 'unite'

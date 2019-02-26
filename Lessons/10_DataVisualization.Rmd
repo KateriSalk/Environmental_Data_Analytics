@@ -41,7 +41,7 @@ print(O3plot1)
 
 O3plot2 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone)) +
-  theme_bw()
+  theme_bw()  #the background is white now, the grid is grey, and there is a black box around it
 print(O3plot2)
 
 O3plot3 <- ggplot(EPAair) +
@@ -53,6 +53,8 @@ O3plot4 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone)) +
   theme_classic()
 print(O3plot4)
+
+#you can seatch for theme in help window, but it's more helpful to look on google
 ```
 
 Notice that some aspects of your graph have not been adjusted, including: 
@@ -66,7 +68,9 @@ If you would like to set a common theme across all plots in your analysis sessio
 ```{r, fig.height = 3, fig.width = 4, warning = FALSE}
 mytheme <- theme_classic(base_size = 14) +
   theme(axis.text = element_text(color = "black"), 
-        legend.position = "top") #alternative: legend.position + legend.justification
+        legend.position = "top") #this is gonna be outside of your graph
+      # you can make it inside the box too: legend.position = c(1,1), legend.justification = c(1,1)
+      #alternative: legend.position + legend.justification
 
 # options: call the theme in each plot or set the theme at the start. 
 
@@ -75,7 +79,7 @@ O3plot5 <- ggplot(EPAair) +
   mytheme
 print(O3plot5)  
 
-theme_set(mytheme)
+theme_set(mytheme) #this is when you need to run a lot of graphs, you can just set it to the theme you created, and R will run this till the end of the session; this can be override
 
 O3plot6 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone))
@@ -90,17 +94,18 @@ While the theme allows us to set multiple aspects of plots, ggplot allows us to 
 ```{r, fig.height = 3, fig.width = 4, warning = FALSE}
 O3plot7 <- ggplot(EPAair, aes(x = Date, y = Ozone)) +
   geom_rect(xmin = as.Date("2016-01-01"), xmax = as.Date("2020-01-01"), 
-            ymin = 0, ymax = 50, fill = "green") +
+            ymin = 0, ymax = 50, fill = "green") + 
   geom_rect(xmin = as.Date("2016-01-01"), xmax = as.Date("2020-01-01"), 
             ymin = 50, ymax = 100, fill = "yellow") +
-  geom_point() +
+  geom_point() + 
+  #then we wanna create color layers that's easy to see and it's according to EPA air quality
   geom_text(x = as.Date("2019-01-01"), y = 45, label = "good", hjust = 1, fontface = "bold") +
-  geom_text(x = as.Date("2019-01-01"), y = 95, label = "moderate", hjust = 1, fontface = "bold") +
+  geom_text(x = as.Date("2019-01-01"), y = 95, label = "moderate", hjust = 1, fontface = "bold") + #hjust means to move the points horizontally; there's vjust too; hjust 1 means to put it to the very right, it means coordinates 
   scale_x_date(limits = as.Date(c("2017-01-01", "2018-12-31")), 
     date_breaks = "2 months", date_labels = "%b %y") +
-  ylab(expression("O"[3]* " AQI Value")) +
-  theme(axis.text.x = element_text(angle = 45,  hjust = 1))
-print(O3plot7)  
+  ylab(expression("O"[3]* " AQI Value")) + #this is add the title for y axis; []is for subscript
+  theme(axis.text.x = element_text(angle = 45,  hjust = 1)) #put the x axis slanted 45 degree
+print(O3plot7)   
 
 ```
 
@@ -136,14 +141,16 @@ print(NvsP)
 # change your axis labels to reflect TN and TP in micrograms per liter.
 # change your legend labels
 NvsP2 <-
-  ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth, shape = lakename)) +
+  ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, fill = depth, shape = lakename)) +
   geom_point(alpha = 0.8, size = 3) +
-  #xlab() +
-  #ylab() +
+  xlab(expression(paste("Total Phosphate Concentration (",mu,"g/L)"))) +
+  ylab(expression(paste("Total Nitrogen Concentration (",mu,"g/L)"))) +
   # change your legend labels here
-  scale_shape_manual(values = c(15, 17)) +
+  labs(fill = "depth (meter)") + #use fill coz in the first line of this chunk you define fill to be depth
+  labs(shape = "lake") +
+  scale_shape_manual(values = c(21, 23)) + #the shape(you can google) is coded, you can choose other shapes
   #scale_color_distiller(palette = "Blues", direction = 1) + # use scale_color_brewer for discrete variables
-  scale_color_viridis(option = "magma", direction = -1) +
+  scale_fill_viridis(option = "magma", direction = -1) +
   theme(legend.position = "right", 
         legend.text = element_text(size = 12), legend.title = element_text(size = 12))
 print(NvsP2)
@@ -157,7 +164,7 @@ Nutrientplot <-
 # place your additional edits here
   scale_y_continuous(expand = c(0, 0)) +
   #scale_color_brewer(palette = "YlGnBu") +
-  #scale_color_manual(values = c("#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84")) +
+  #scale_color_manual(values = c("#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84")) + #all these codes are from colorbrew website, just grab the code for the darkest to the lightest one for yourself; or you can just type in the color that's pretty common, like "black", there's a RColor sheet online too to look for colors
   #scale_color_viridis(discrete = TRUE) +
   theme(legend.position = "right")
 print(Nutrientplot)
@@ -171,7 +178,7 @@ PMplot.faceted <-
   geom_point() +
   facet_grid(Site.Name ~ year) + 
   scale_x_continuous(breaks = c(1:12)) +
-  #theme(strip.background = element_rect(fill = "black"), strip.text = element_text(color = "white"))
+  #theme(strip.background = element_rect(fill = "black"), strip.text = element_text(color = "white")) +
   ylab(expression("PM 2.5 AQI Value")) 
 print(PMplot.faceted)
 

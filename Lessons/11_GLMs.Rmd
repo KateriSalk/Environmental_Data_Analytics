@@ -73,18 +73,22 @@ Are Ozone levels below the threshold for "good" AQI index (0-50)?
 summary(EPAair$Ozone)
 
 # Evaluate assumption of normal distribution
-shapiro.test(EPAair$Ozone)
+shapiro.test(EPAair$Ozone) 
 ggplot(EPAair, aes(x = Ozone)) +
   geom_histogram(stat = "count")
 qqnorm(EPAair$Ozone); qqline(EPAair$Ozone)
 
 O3.onesample <- t.test(EPAair$Ozone, mu = 50, alternative = "less")
 O3.onesample
+#the p value is very small, it supports us to reject the null hypo
+
 ```
 
 What information does the output give us? How might we report this information in a report?
 
-> ANWSER:
+> ANWSER: Ozone AQI values in 2017-2018 were significantly lower than 50 (one sample t-test; t = -41.9. df = 1084, p < 0.001).
+
+Always think about what your outcome tells you about.
 
 ### Two-sample t-test
 The two-sample *t* test is used to test the hypothesis that the mean of two samples is equivalent. Unlike the one-sample tests, a two-sample test requires a second assumption that the variance of the two groups is equivalent. Are Ozone levels different between Blackstone and Bryson City?
@@ -99,7 +103,8 @@ ggplot(EPAair, aes(x = Ozone, color = Site.Name)) +
 
 # Format as a t-test
 O3.twosample <- t.test(EPAair$Ozone ~ EPAair$Site.Name)
-O3.twosample
+O3.twosample 
+#The result tells us there is a significant difference in those two groups
 O3.twosample$p.value
 
 # Format as a GLM
@@ -130,6 +135,7 @@ ggplot(EPAair, aes(x = PM2.5, color = Site.Name)) +
   geom_freqpoly(stat = "count")
 qqnorm(EPAair$PM2.5); qqline(EPAair$PM2.5)
 
+
 bartlett.test(EPAair$PM2.5 ~ EPAair$Site.Name)
 
 # Format as a GLM
@@ -142,6 +148,8 @@ summary(PM2.5.anova2)
 
 # Run a post-hoc test for pairwise differences
 TukeyHSD(PM2.5.anova2)
+#pair bryson and black, pair triple and black have significantly different means
+
 
 # Plot the results
 # How might you edit this graph to make it attractive?
@@ -152,7 +160,7 @@ print(PM2.5.anova.plot)
 ```
 What information does the output give us? How might we report this information in a report?
 
-> ANSWER:
+> ANSWER: Blackstone has overall higher PM2.5 than bryson and triple oak (ANOVA; F = 16.16, df = 1898, p < 0.0001)
 
 ### Non-parametric equivalent of ANOVA: Kruskal-Wallis Test
 As with the Wilcoxon test, the Kruskal-Wallis test is the non-parametric counterpart to the one-way ANOVA. Here, the data from two or more independent samples are replaced with their ranks without regard to the grouping AND based on the between-group sum of squares calculations. 
@@ -178,6 +186,8 @@ A two-way ANOVA allows us to examine the effects of two categorical explanatory 
 ```{r}
 TNanova.main <- lm(PeterPaul.nutrients$tn_ug ~ PeterPaul.nutrients$lakename + PeterPaul.nutrients$depth_id)
 summary(TNanova.main)
+
+#the result shows TN = 309.39(paul lake, depth id 1)  +105.29  +97.28
 
 TNanova.main2 <- aov(PeterPaul.nutrients$tn_ug ~ PeterPaul.nutrients$lakename + PeterPaul.nutrients$depth_id)
 summary(TNanova.main2)

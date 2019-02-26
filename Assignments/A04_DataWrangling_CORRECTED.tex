@@ -199,7 +199,7 @@ begins.
 \end{Shaded}
 
 \begin{verbatim}
-## -- Attaching packages ------------------------------------------------------------ tidyverse 1.2.1 --
+## -- Attaching packages ----------------------------------------------------- tidyverse 1.2.1 --
 \end{verbatim}
 
 \begin{verbatim}
@@ -210,7 +210,7 @@ begins.
 \end{verbatim}
 
 \begin{verbatim}
-## -- Conflicts --------------------------------------------------------------- tidyverse_conflicts() --
+## -- Conflicts -------------------------------------------------------- tidyverse_conflicts() --
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()
 \end{verbatim}
@@ -964,20 +964,35 @@ files.}\label{wrangle-individual-datasets-to-create-processed-files.}
             \DataTypeTok{mean_pm2.5 =} \KeywordTok{mean}\NormalTok{(PM2.}\DecValTok{5}\NormalTok{))}
 
 \CommentTok{#12b Create a summary table of the mean, minimum, and maximum AQI values of O3 and PM2.5 for each site}
-\NormalTok{o3_pm25_}\FloatTok{1718.}\NormalTok{summary.site <-}
+\NormalTok{o3_}\FloatTok{1718.}\NormalTok{summary.site <-}
 \StringTok{  }\NormalTok{o3_pm25_}\FloatTok{1718.}\NormalTok{spread }\OperatorTok{%>%}
 \StringTok{  }\KeywordTok{group_by}\NormalTok{(Site.Name) }\OperatorTok{%>%}
-\StringTok{  }\KeywordTok{filter}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(Ozone) }\OperatorTok{&}\StringTok{ }\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(PM2.}\DecValTok{5}\NormalTok{)) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(Ozone)) }\OperatorTok{%>%}
 \StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{mean_o3 =} \KeywordTok{mean}\NormalTok{(Ozone),}
-            \DataTypeTok{mean_pm2.5 =} \KeywordTok{mean}\NormalTok{(PM2.}\DecValTok{5}\NormalTok{),}
             \DataTypeTok{min_o3 =} \KeywordTok{min}\NormalTok{(Ozone),}
+            \DataTypeTok{max_o3 =} \KeywordTok{max}\NormalTok{(Ozone))}
+          
+\NormalTok{pm25_}\FloatTok{1718.}\NormalTok{summary.site <-}
+\StringTok{  }\NormalTok{o3_pm25_}\FloatTok{1718.}\NormalTok{spread }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{group_by}\NormalTok{(Site.Name) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{filter}\NormalTok{(}\OperatorTok{!}\KeywordTok{is.na}\NormalTok{(PM2.}\DecValTok{5}\NormalTok{)) }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{summarise}\NormalTok{(}\DataTypeTok{mean_pm2.5 =} \KeywordTok{mean}\NormalTok{(PM2.}\DecValTok{5}\NormalTok{),}
             \DataTypeTok{min_pm2.5 =} \KeywordTok{min}\NormalTok{(PM2.}\DecValTok{5}\NormalTok{),}
-            \DataTypeTok{max_o3 =} \KeywordTok{max}\NormalTok{(Ozone),}
             \DataTypeTok{max_pm2.5 =} \KeywordTok{max}\NormalTok{(PM2.}\DecValTok{5}\NormalTok{))}
 
+\NormalTok{o3pm25_}\FloatTok{1718.}\NormalTok{summary.site <-}\StringTok{ }\KeywordTok{full_join}\NormalTok{(o3_}\FloatTok{1718.}\NormalTok{summary.site, pm25_}\FloatTok{1718.}\NormalTok{summary.site)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Joining, by = "Site.Name"
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
 \CommentTok{#13 View the summary tables}
 \KeywordTok{view}\NormalTok{(o3_pm25_}\FloatTok{1718.}\NormalTok{summary.month)}
-\KeywordTok{view}\NormalTok{(o3_pm25_}\FloatTok{1718.}\NormalTok{summary.site)}
+\KeywordTok{view}\NormalTok{(o3pm25_}\FloatTok{1718.}\NormalTok{summary.site)}
 \end{Highlighting}
 \end{Shaded}
 

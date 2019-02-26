@@ -50,17 +50,20 @@ Important components of the linear regression are the correlation and the R-squa
 ### Simple Linear Regression
 For the NTL-LTER dataset, can we predict irradiance (light level) from depth?
 ```{r}
+#Make sure explanatory variable(x) is on the right, dependent variable(y) is on the left
 irradiance.regression <- lm(PeterPaul.chem.nutrients$irradianceWater ~ PeterPaul.chem.nutrients$depth)
+
 # another way to format the lm function
 irradiance.regression <- lm(data = PeterPaul.chem.nutrients, irradianceWater ~ depth)
 summary(irradiance.regression)
+# irrdiance = 487 - 96*(depth) + error for each meter we go down in the water, our irridiance is gonna go down 96 
 
 # Correlation
 cor.test(PeterPaul.chem.nutrients$irradianceWater, PeterPaul.chem.nutrients$depth)
 ```
 Question: How would you report the results of this test (overall findings and report of statistical output)?
 
-> ANSWER: 
+> ANSWER: general summary: irridiance is negatively associated with depth (linear regression; R2 = 0.31, df = 15449, p < 0.0001)
 
 So, we see there is a significant negative correlation between irradiance and depth (lower light levels at greater depths), and that this model explains about 31 % of the total variance in irradiance. Let's visualize this relationship and the model itself. 
 
@@ -95,25 +98,31 @@ Given the distribution of irradiance values, we don't have a linear relationship
 PeterPaul.chem.nutrients <- filter(PeterPaul.chem.nutrients, irradianceWater != 0)
 irradiance.regression2 <- lm(data = PeterPaul.chem.nutrients, log(irradianceWater) ~ depth)
 summary(irradiance.regression2)
+# log(irridiance) = 6.2 - 0.74*(depth) + error
 plot(irradiance.regression2)
+
 
 # Add a line and standard error for the linear regression
 irradiancebydepth2 <- 
   ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = irradianceWater)) +
-  geom_smooth(method = "lm") +
-  scale_y_log10() +
-  geom_point() 
+  geom_smooth(method = "lm") + #if you wanna put the line above the point, then put geom_smooth() after you put geom_point
+  scale_y_log10() + #can just plot the y value to log scale
+  geom_point()
 print(irradiancebydepth2) 
 
 # SE can also be removed
 irradiancebydepth2 <- 
     ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = irradianceWater)) +
-    geom_point() +
+    geom_point(alpha = 0.5) + #this makes the points 50% transparent
     scale_y_log10() +
-    geom_smooth(method = 'lm', se = FALSE, color = "black")
+    labs(x = "depth (m)", y = "Water Irridiance (units)") +
+    scale_x_continuous(breaks = c(0, 2, 4, 6, 8, 10, 12)) +
+    geom_smooth(method = 'lm', se = FALSE, color = "red") #se = FALSE can remove the standard deviation interval
 print(irradiancebydepth2)
 
 # Make the graph attractive
+# you can put 0 at 0, make them line up
+
 
 ```
 
@@ -130,13 +139,17 @@ It is possible, and often useful, to consider multiple continuous explanatory va
 
 ``` {r, fig.height = 3, fig.width = 4}
 TPregression <- lm(data = PeterPaul.chem.nutrients, tp_ug ~ depth + dissolvedOxygen)
-summary(TPregression)
+summary(TPregression) # we put + between multiple variables
+# TP = 6 + 1.5 * depth + 0.94 * dissolved oxygen + error (both depth and DO are significant predictors)
+# however, we have an R square of 0.08: this means that our stats only explain 8% of variance in the data
+# at the surface when we have 0 oxygen we have a prediction of 6 TP
 
 TPplot <- ggplot(PeterPaul.chem.nutrients, 
                  aes(x = dissolvedOxygen, y = tp_ug, color = depth)) +
   geom_point() +
   xlim(0, 20)
 print(TPplot)
+# this shows that our linear model is not a good model to show the relationship
 ```
 ### Correlation Plots
 We can also make exploratory plots of several continuous data points to determine possible relationships, as well as covariance among explanatory variables. 
@@ -144,13 +157,16 @@ We can also make exploratory plots of several continuous data points to determin
 ```{r, fig.height = 3, fig.width = 4}
 #install.packages("corrplot")
 library(corrplot)
-PeterPaulnutrients <- 
+PeterPaulnutrients <- #the corrplot needs a full dataset; can't have any NAs
   PeterPaul.chem.nutrients %>%
   select(tn_ug:po4) %>%
   na.omit()
 PeterPaulCorr <- cor(PeterPaulnutrients)
-corrplot(PeterPaulCorr, method = "ellipse")
-corrplot.mixed(PeterPaulCorr, upper = "ellipse")
+corrplot(PeterPaulCorr, method = "ellipse") #if not elipse, it's only gonna show the color intensity; elipse shows a direcional relationship; nitrate and total nitrogen has a strong positive relationship
+corrplot.mixed(PeterPaulCorr, upper = "ellipse") #this one show you both the number and the shape
+# Why is it problematic to throw in variables and see what happen?
+# there is a chance to have some correlation between the variables, but they might not make sense at all 
+
 ```
 ### AIC to select variables
 
@@ -162,9 +178,15 @@ Let's say we want to know which explanatory variables will allow us to best pred
 PeterPaul.naomit <- na.omit(PeterPaul.chem.nutrients)
 TPAIC <- lm(data = PeterPaul.naomit, tp_ug ~ depth + dissolvedOxygen + 
               temperature_C + tn_ug + po4)
+# we just chose what we think will be a good variable based on what we know
 step(TPAIC)
+#the lower the AIC number the better, for this one it's 884.92; but it's only relevant to each other in the dataset
+#basically, it is to see removing which variable will result in the most decrease in AIC
+#for example, removing dissolved oxygen will result in an AIC of 882.96, removing temperature will result in an AIC of 903, so you would remove dissolved oxygen instead of temperature
 TPmodel <- lm(data = PeterPaul.naomit, tp_ug ~ temperature_C + tn_ug)
+#This is the best model we get from AIC and we can run this to better see its information
 summary(TPmodel)
+
 
 ```
 
@@ -176,11 +198,18 @@ Let's say we wanted to predict total nitrogen concentrations by depth and by lak
 ```{r, fig.height = 3, fig.width = 4}
 # main effects
 TNancova.main <- lm(data = PeterPaul.chem.nutrients, tn_ug ~ lakename + depth)
+# what's effect of lake name and what's the effect of depth?
 summary(TNancova.main)
+# we predicting total nitrogen
+# the intercept is 353, this means paul lake at depth 0 will have 353 ug/L tn
+# then for peter lake at depth 0 will have 135 MORE tn 
+# then depth is another main effect, we see a 9.7 decrease in tn as it goes 1m deeper
 
 # interaction effects
 TNancova.interaction <- lm(data = PeterPaul.chem.nutrients, tn_ug ~ lakename * depth)
 summary(TNancova.interaction)
+# for peter lake: we decrease in 48.42 for depth; but for paul lake we inrease in 19.87 for depth
+
 
 TNplot <- ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = tn_ug, color = lakename)) + 
   geom_point() + 

@@ -153,20 +153,29 @@ o3_pm25_1718.summary.month <-
             mean_pm2.5 = mean(PM2.5))
 
 #12b Create a summary table of the mean, minimum, and maximum AQI values of O3 and PM2.5 for each site
-o3_pm25_1718.summary.site <-
+o3_1718.summary.site <-
   o3_pm25_1718.spread %>%
   group_by(Site.Name) %>%
-  filter(!is.na(Ozone) & !is.na(PM2.5)) %>%
+  filter(!is.na(Ozone)) %>%
   summarise(mean_o3 = mean(Ozone),
-            mean_pm2.5 = mean(PM2.5),
             min_o3 = min(Ozone),
+            max_o3 = max(Ozone))
+          
+pm25_1718.summary.site <-
+  o3_pm25_1718.spread %>%
+  group_by(Site.Name) %>%
+  filter(!is.na(PM2.5)) %>%
+  summarise(mean_pm2.5 = mean(PM2.5),
             min_pm2.5 = min(PM2.5),
-            max_o3 = max(Ozone),
             max_pm2.5 = max(PM2.5))
 
-#13 View the summary tables
-view(o3_pm25_1718.summary.month)
-view(o3_pm25_1718.summary.site)
+o3pm25_1718.summary.site <- full_join(o3_1718.summary.site, pm25_1718.summary.site)
+
+
+
+#13 Display the summary tables
+print(o3_pm25_1718.summary.month)
+print(o3pm25_1718.summary.site)
 
 ```
 

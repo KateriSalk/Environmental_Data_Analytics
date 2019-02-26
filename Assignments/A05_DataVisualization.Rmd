@@ -1,6 +1,6 @@
 ---
 title: "Assignment 5: Data Visualization"
-author: "Student Name"
+author: "Wanchen Xiong"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -33,16 +33,44 @@ The completed exercise is due on Tuesday, 19 February, 2019 before class begins.
 2. Make sure R is reading dates as date format, not something else (hint: remember that dates were an issue for the USGS gauge data).
 
 ```{r}
-#1
+#1 Import the data files
+getwd()
+library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(viridis)
+library(gridExtra)
 
-#2
+PeterPaul.chem.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
+PeterPaul.nutrients.gathered <- read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
+USGS.stream <- read.csv("./Data/Raw/USGS_Site02085000_Flow_Raw.csv")
+ecotox <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Mortality_raw.csv")
+
+#2 Mkae sure the date column is recognized as data by R
+class(PeterPaul.chem.nutrients$sampledate)
+PeterPaul.chem.nutrients$sampledate <- as.Date(PeterPaul.chem.nutrients$sampledate, format = "%Y-%m-%d")
+
+class(PeterPaul.nutrients.gathered$sampledate)
+PeterPaul.nutrients.gathered$sampledate <- as.Date(PeterPaul.nutrients.gathered$sampledate, format = "%Y-%m-%d")
+
+class(USGS.stream$datetime)
+USGS.stream$datetime <- as.Date(USGS.stream$datetime, format = "%m/%d/%y")
+USGS.stream$datetime <- format(USGS.stream$datetime, "%y%m%d")
+create.early.dates <- (function(d) {
+       paste0(ifelse(d > 181231,"19","20"),d)} )
+USGS.stream$datetime <- create.early.dates(USGS.stream$datetime)
+USGS.stream$datetime <- as.Date(USGS.stream$datetime, format = "%Y%m%d")
+
 ```
 ## Define your theme
 3. Build a theme and set it as your default theme.
 
 ```{r}
 #3
-
+mytheme <- theme_gray() +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "right")
+theme_set(mytheme)
 ```
 
 ## Create graphs
@@ -52,24 +80,76 @@ Hint: a good way to build graphs is to make them ugly first and then create more
 
 4. [NTL-LTER] Plot total phosphorus by phosphate, with separate aesthetics for Peter and Paul lakes. Add a line of best fit and color it black.
 
-```{r}
-#4
+```{r, fig.height = 3, fig.width = 4, warning = FALSE}
+#4 Create a graph to demonstrate the relationship between total phosphorus and phosphate; Peter lake and Paul lake are shown in comparison.
+
+plot.tp.po <- ggplot(PeterPaul.chem.nutrients, aes(x=po4, y=tp_ug, color=lakename)) +
+  geom_point() +
+  scale_color_manual(values = c("Paul Lake" = "dodgerblue", "Peter Lake" = "purple")) +
+  xlim(0, 50) +
+  geom_smooth(color = "black", method = lm) +
+  xlab(expression(paste("Phosphate Concentration (",mu,"g/L)"))) +
+  ylab(expression(paste("Total Phosphorus (",mu,"g/L)"))) +
+  labs(color = "Lake")
+print(plot.tp.po)
+
 
 ```
 
 
 5. [NTL-LTER] Plot nutrients by date for Peter Lake, with separate colors for each depth. Facet your graph by the nutrient type.
 
-```{r}
-#5
+```{r, fig.height = 3, fig.width = 6, warning = FALSE}
+#5 Plot a graph to show depth and concentration of each nutrient.
+
+names.nutrient <- c(
+  "nh34" = "nitrate",
+  "no23" = "nitrite",
+  "po4" = "phosphate",
+  "tn_ug" = "total nitrogen",
+  "tp_ug" = "total phosphorus"
+)
+
+plot.nutrient <- ggplot(PeterPaul.nutrients.gathered) +
+  geom_point(aes(x=sampledate, y=concentration, color=depth)) +
+  scale_color_viridis(option = "magma", direction = -1) +
+  scale_x_date(date_breaks = "3 years", date_labels = "%Y") +
+  facet_wrap(vars(nutrient), ncol = 5, labeller = as_labeller(names.nutrient)) +
+  ylab(expression(paste("Concentration (",mu,"g/L)"))) +
+  xlab(expression("Sample Date (Year)")) +
+  labs(color = "Depth of Lake (m)") +
+  theme(axis.text.x = element_text(angle = 70,  hjust = 1))
+print(plot.nutrient)
+
 
 ```
 
 
 6. [USGS gauge] Plot discharge by date. Create two plots, one with the points connected with geom_line and one with the points connected with geom_smooth (hint: do not use method = "lm"). Place these graphs on the same plot (hint: ggarrange or something similar)
 
-```{r}
-#6
+```{r, fig.height = 3, fig.width = 6, warning = FALSE}
+#6 Plot a graph to show the discharge by date in two ways
+
+class(USGS.stream$datetime)
+
+plot.discharge.line <- ggplot(USGS.stream, aes(x = datetime, y = X84936_00060_00003)) +
+   scale_x_date(limits = as.Date(c("2004-01-01", "2019-01-01"))) +
+  ylab(expression(paste("Discharge (ft"^3*"/second)"))) +
+  xlab(expression("Sample Date (Year)")) +
+  geom_point(color="navy") +
+  geom_line(color="navy") 
+print(plot.discharge.line)
+
+plot.discharge.smooth <- ggplot(USGS.stream, aes(x = datetime, y = X84936_00060_00003)) +
+  scale_x_date(limits = as.Date(c("2004-01-01", "2019-01-01"))) +
+  ylab(expression(paste("Discharge (ft"^3*"/second)"))) +
+  xlab(expression("Sample Date (Year)")) +
+  geom_point(color="navy") +
+  geom_smooth(color="coral")
+print(plot.discharge.smooth)
+
+plot.disc.combo <- grid.arrange(plot.discharge.line, plot.discharge.smooth)
+print(plot.disc.combo)
 
 ```
 Question: How do these two types of lines affect your interpretation of the data?
@@ -78,8 +158,20 @@ Question: How do these two types of lines affect your interpretation of the data
 
 7. [ECOTOX Neonicotinoids] Plot the concentration, divided by chemical name. Choose a geom that accurately portrays the distribution of data points.
 
-```{r}
-#7 
+```{r, fig.height = 3, fig.width = 4, warning = FALSE}
+# Plot a graph to demonstrate distribution of concentration for each chemical
+
+unique.ecotox <- unique(ecotox[,1:13])
+sameunit.ecotox <- filter(unique.ecotox, Conc..Units..Std. == "AI mg/L")
+
+plot.ecotox <- ggplot(sameunit.ecotox, aes(x = Chemical.Name, y = Conc..Mean..Std.)) +
+  geom_boxplot() +
+  ylim(0,500) +
+  xlab(expression("Chemical Name")) +
+  ylab(expression("Concentration (mg/L)")) +
+  theme(axis.text.x = element_text(angle = 30,  hjust = 1))
+print(plot.ecotox)
+
 
 ```
 
