@@ -1,9 +1,11 @@
 ---
-title: "Assignment 6: Generalized Linear Models"
-author: "Student Name"
-output: pdf_document
+title: 'Assignment 6: Generalized Linear Models'
+author: "Xin Zhang"
 geometry: margin=2.54cm
-editor_options: 
+output:
+  pdf_document: default
+  word_document: default
+editor_options:
   chunk_output_type: console
 ---
 
@@ -34,9 +36,18 @@ The completed exercise is due on Tuesday, 26 February, 2019 before class begins.
 
 ```{r}
 #1
-
+getwd()
+library(tidyverse)
+library(viridis)
+library(RColorBrewer)
+library(colormap)
+Ecotox <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Mortality_raw.csv")
+ChemPhy <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv")
 #2
-
+mytheme <- theme_classic(base_size = 14) +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "top")
+theme_set(mytheme)
 ```
 
 ## Neonicotinoids test
@@ -48,33 +59,56 @@ Research question: Were studies on various neonicotinoid chemicals conducted in 
 
 5. Is there equal variance among the publication years for each chemical? Hint: var.test is not the correct function.
 
-```{r}
+```{r,fig.width=10, fig.height= 6}
 #3
+summary(Ecotox$Chemical.Name)
+nlevels(Ecotox$Chemical.Name)
+#9 different chemicals are listed
 
 #4
+class(Ecotox$Pub..Year)
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Acetamiprid"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Clothianidin"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Dinotefuran"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Imidacloprid"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Imidaclothiz"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Nitenpyram"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Nithiazine"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Thiacloprid"])
+shapiro.test(Ecotox$Pub..Year[Ecotox$Chemical.Name == "Thiamethoxam"])
 
+ggplot(Ecotox, aes(x = Pub..Year, color = Chemical.Name)) +
+  geom_freqpoly(stat = "count")+
+  labs(x ="Publication Year", y="Count", color ="Chemical Name")+
+   scale_color_brewer(palette = "Set1", direction = 1)
+  
 #5
-
+bartlett.test(Ecotox$Pub..Year ~ Ecotox$Chemical.Name)
 ```
 
 6. Based on your results, which test would you choose to run to answer your research question?
 
-> ANSWER: 
+> ANSWER: Since they are not normal distributions (sharpiro.test pvalue<0.0001), and there are not equal variance (bartlett.test, df=8, pvalue<0.0001), I will choose to run a Non-parametric equivalent of ANOVA: Kruskal-Wallis Test. 
 
 7. Run this test below. 
 
 8. Generate a boxplot representing the range of publication years for each chemical. Adjust your graph to make it pretty.
-```{r}
+```{r,fig.width=10, fig.height= 6}
 #7
-
+yr.chemical <- kruskal.test(Ecotox$Pub..Year ~ Ecotox$Chemical.Name)
+yr.chemical
 #8
-
+ggplot(Ecotox, aes(y = Pub..Year, x = Chemical.Name)) +
+  geom_boxplot()+
+  labs(x ="Chemicals", y="Publication Year")+
+  scale_y_discrete(limits = (c(1982:2018))) 
+ 
 ```
 
 
 9. How would you summarize the conclusion of your analysis? Include a sentence summarizing your findings and include the results of your test in parentheses at the end of the sentence. 
 
-> ANSWER: 
+> ANSWER: Studies on various neonicotinoid chemicals conducted in different years (Kruskal-Wallis rank sum test; Kruskal-Wallis chi-squared = 134.15, df = 8, p<0.0001)
 
 ## NTL-LTER test
 Research question: What is the best set of predictors for lake temperatures in July across the monitoring period at the North Temperate Lakes LTER? 
@@ -89,30 +123,62 @@ Research question: What is the best set of predictors for lake temperatures in J
 
 ```{r}
 #11
+#daynum cannot make it to choose July because 6/30 and 7/1 are both 182....
+ChemPhy2<-cbind(Month = ChemPhy$sampledate, ChemPhy)
+ChemPhy2$Month <- as.Date(ChemPhy2$Month, format = "%m/%d/%y")
+ChemPhy2$Month <- format.Date(ChemPhy2$Month, format = "%m")
+subchemphy<-
+  #ChemPhy2 %>%
+  #filter(Month == "07") %>%
+  ChemPhy %>%
+  filter(daynum >=182 & daynum<=213) %>%
+  select(lakename, year4, daynum, depth, temperature_C) %>%
+  na.omit()
+
+subchemphy2<-
+  ChemPhy2 %>%
+  filter(Month == "07") %>%
+  select(lakename, year4, daynum, depth, temperature_C) %>%
+  na.omit()
 
 #12
-
+tempAIC <- lm(data = subchemphy, temperature_C ~ year4 + daynum + depth)
+step(tempAIC)
+tempAIC2 <- lm(data = subchemphy2, temperature_C ~ year4 + daynum + depth)
+step(tempAIC2)
+#full model has the smallest AIC: temperature_C ~ year4 + daynum + depth
+summary(tempAIC)
+summary(tempAIC2)
 ```
 
 13. What is the final linear equation to predict temperature from your multiple regression? How much of the observed variance does this model explain?
 
-> ANSWER: 
+> ANSWER: Final linear equation: temperature_C = -14.33 + 0.01*year4 + 0.04*daynum - 1.94*depth. (linear regression, R2=0.74, df=9972, p<0.0001(except for the intercept)). This model explains 74% variance.The coefficient of the intercept -14.33 means that when year4, daynum and depth are are 0, the temperature will be -14.33 celsius. The coefficient of year4 means that when year4 increases by 1, the temperature will increase by 0.01.The coefficient of daynum means that when daynum increases by 1, the temperature will increase by 0.04.The coefficient of depth means that when depth increases by 1, the temperature will decrease by 1.94.
+
+> If choose July directly instead of using daynum, the result will be the following: temperature_C = -8.58 + 0.01*year4 + 0.04*daynum - 1.95*depth. (linear regression, R2=0.74, df=9724, p<0.0001(except for the intercept)).The coefficient of the intercept -14.33 means that when year4, daynum and depth are are 0, the temperature will be -8.58 celsius. The coefficient of year4 means that when year4 increases by 1, the temperature will increase by 0.01.The coefficient of daynum means that when daynum increases by 1, the temperature will increase by 0.04.The coefficient of depth means that when depth increases by 1, the temperature will decrease by 1.95.
 
 14. Run an interaction effects ANCOVA to predict temperature based on depth and lakename from the same wrangled dataset.
 
 ```{r}
 #14
-
+temp2 <- lm(data = subchemphy, temperature_C ~ depth * lakename)
+summary(temp2)
 ```
 
 15. Is there an interaction between depth and lakename? How much variance in the temperature observations does this explain?
 
-> ANSWER: 
+> ANSWER: Yes, there is an interatction between depth and lakename (interactive variables p<0.01). This model explain 79% variance. (ANVOVA, R2=0.79, df=9710, p<0.01)
 
 16. Create a graph that depicts temperature by depth, with a separate color for each lake. Add a geom_smooth (method = "lm", se = FALSE) for each lake. Make your points 50 % transparent. Adjust your y axis limits to go from 0 to 35 degrees. Clean up your graph to make it pretty. 
 
-```{r}
+```{r, fig.width=10, fig.height= 6}
 #16
+ggplot(subchemphy, aes(x = depth, y = temperature_C, color = lakename)) +
+  geom_point(alpha=0.5)+
+  geom_smooth(method = "lm", se = FALSE)+
+  ylim(0,35)+
+  labs(x ="Depth (m)", y="Temperature (Celsius)", color ="Lake")+
+ scale_color_brewer(palette = "Set1", direction = 1)
 
 ```
 
