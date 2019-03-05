@@ -75,7 +75,7 @@ PeterPaul.summertemp <-
   #add a "week" column to represent seasonality
   mutate(Week = week(sampledate)) %>%
   #code won't work if there are NAs
-  na.exclude()
+  na.exclude() #autocorrelation doesn't work with NAs
 
 ggplot(PeterPaul.summertemp, aes(x = sampledate, y = temperature_C, color = lakename)) +
   geom_point() +
@@ -87,9 +87,10 @@ Next, we will determine the degree of temporal autocorrelation in our dataset. W
 ```{r}
 # Determine autocorrelation in residuals
 TempTest.auto <- lme(data = PeterPaul.summertemp,
-                     temperature_C ~ sampledate * lakename, 
-                     random = ~1|Week)
-TempTest.auto
+                     temperature_C ~ sampledate * lakename, #fixed effect ANCOVA
+                     random = ~1|Week) #specify random effects
+TempTest.auto 
+# 1.58 sd, 1.94 residual, 14 weeks (groups)
 
 ACF(TempTest.auto)
 
@@ -124,7 +125,7 @@ anova(TempTest.mixed, TempTest.fixed)
 # Post-hoc test
 # This will yield groupings of temperature by lake for the average date value
 TempTest.posthoc = lsmeans(TempTest.mixed, ~ sampledate * lakename)
-cld(TempTest.posthoc, alpha = 0.05, Letters = letters, adjust = "tukey")
+cld(TempTest.posthoc, alpha = 0.05, Letters = letters, adjust = "tukey") #both group a, no signifiant difference
 
 # display our final relationship
 ggplot(PeterPaul.summertemp, aes(x = sampledate, y = temperature_C, color = lakename)) +
