@@ -71,6 +71,8 @@ PeterPaul.nutrients.surface <-
 ggplot(PeterPaul.nutrients.surface, aes(x = sampledate, y = tp_ug, color = lakename)) + 
   geom_point() +
   scale_color_manual(values = c("#7fcdbb", "#253494"))
+# Peter lake has higher phosphrus --> they start to pour out fertilizer in peter lake since 1993
+
 
 # Split dataset by lake
 Peter.nutrients.surface <- filter(PeterPaul.nutrients.surface, lakename == "Peter Lake")
@@ -78,6 +80,9 @@ Paul.nutrients.surface <- filter(PeterPaul.nutrients.surface, lakename == "Paul 
 
 # Run a Mann-Kendall test
 mk.test(Peter.nutrients.surface$tp_ug)
+# it doesn't look at the date, just look at the relative position
+# the result tells us there is a trend over time, the farther Z is from 0, the stronger the trend, it tells us the magnitude of the trend. It's positive, so there's a positive association
+
 
 ```
 
@@ -88,13 +93,33 @@ Pettitt's test is also included in the `trend` package. This nonparametric test 
 ```{r}
 # Test for change point
 pettitt.test(Peter.nutrients.surface$tp_ug)
+# If p is small, then it means that we can detect a change point
+# Pettitt's test for single change-point detection
+# 
+# data:  Peter.nutrients.surface$tp_ug
+# U* = 2767, p-value = 4.92e-09
+# alternative hypothesis: two.sided
+# sample estimates:
+# probable change point at time K 
+#                              35 
+# in this case, it only gives us a relative position, which is 35 in the dataset, which directs to 1993 in May, which makes sense coz it's when we start adding phosphrus
 
 # Run separate Mann-Kendall for each change point
-mk.test(Peter.nutrients.surface$tp_ug[1:34])
-mk.test(Peter.nutrients.surface$tp_ug[35:132])
+mk.test(Peter.nutrients.surface$tp_ug[1:34]) # this tells us there's no trend, not surprising
+mk.test(Peter.nutrients.surface$tp_ug[35:132]) # there might be a negative trend, but not significant
 
 # Is there a second change point?
 pettitt.test(Peter.nutrients.surface$tp_ug[35:132])
+# 	Pettitt's test for single change-point detection
+# 
+# data:  Peter.nutrients.surface$tp_ug[35:132]
+# U* = 1201, p-value = 0.0002228
+# alternative hypothesis: two.sided
+# sample estimates:
+# probable change point at time K 
+#                              79 
+# it tells us the second change point is at 35+79 = 114
+
 
 # Run another Mann-Kendall for the second change point
 mk.test(Peter.nutrients.surface$tp_ug[35:113])
@@ -103,11 +128,23 @@ mk.test(Peter.nutrients.surface$tp_ug[114:132])
 # Run the same test for Paul Lake. 
 mk.test(Paul.nutrients.surface$tp_ug)
 pettitt.test(Paul.nutrients.surface$tp_ug)
+# Pettitt's test for single change-point detection
+# 
+# data:  Paul.nutrients.surface$tp_ug
+# U* = 1024, p-value = 0.1244   --> not a significant change
+# alternative hypothesis: two.sided
+# sample estimates:
+# probable change point at time K 
+#                              58
+
 
 # Add vertical lines to the original graph to represent change points
 ggplot(PeterPaul.nutrients.surface, aes(x = sampledate, y = tp_ug, color = lakename)) + 
   geom_point() +
-  scale_color_manual(values = c("#7fcdbb", "#253494"))
+  scale_color_manual(values = c("#7fcdbb", "#253494")) +
+  geom_vline(xintercept = as.Date("1993-05-20"), lty =2) + #lty = line type, this shows dotted line
+  geom_vline(xintercept = as.Date("1998-01-01"), lty =2)
+
 
 ```
 ### Seasonal Mann-Kendall
@@ -147,13 +184,13 @@ Tip: Check your dataset to see if there is an NA value in the first row. You may
 # Run a linear interpolation of the dataset to fill in gaps
 USGS.flow.data.interpolated <- approx(USGS.flow.data.trimmed$datetime,
                                       USGS.flow.data.trimmed$discharge.mean, 
-                                      method = "linear", n = 3630)
+                                      method = "linear", n = 3630)  #you wanna specify how many you wanna generate
 
 # Turn the interpolated dataset into a proper dataframe
 USGS.flow.data.interpolated <- do.call(cbind.data.frame, USGS.flow.data.interpolated)
 names(USGS.flow.data.interpolated) <- c("Date", "Discharge")
 USGS.flow.data.interpolated$Date <- as.Date(USGS.flow.data.interpolated$Date, 
-                                            origin = "1970/01/01")
+                                            origin = "1970/01/01") #specify the origin
 
 # Create a time series object
 USGS.flow.data.timeseries <- ts(USGS.flow.data.interpolated$Discharge, 
@@ -161,8 +198,43 @@ USGS.flow.data.timeseries <- ts(USGS.flow.data.interpolated$Discharge,
 
 # Run a Seasonal Mann-Kendall test
 USGS.smktest <- smk.test(USGS.flow.data.timeseries)
-USGS.smktest
-summary(USGS.smktest)
+USGS.smktest 
+# Seasonal Mann-Kendall trend test (Hirsch-Slack test)
+# 
+# data:  USGS.flow.data.timeseries
+# z = -15.334, p-value < 2.2e-16
+# alternative hypothesis: true S is not equal to 0
+# sample estimates:
+#        S     varS 
+#   -93386 37089828 
+
+# summary(USGS.smktest)
+# 	Seasonal Mann-Kendall trend test (Hirsch-Slack test)
+# 
+# data: USGS.flow.data.timeseries
+# alternative hypothesis: two.sided
+# 
+# Statistics for individual seasons
+# 
+# H0
+#                       S    varS   tau     z   Pr(>|z|)    
+# Season 1:   S = 0  4158 3106080 0.091 2.359 0.01833881   *
+# Season 2:   S = 0  3495 3106087 0.076 1.983 0.04742183   *
+# Season 3:   S = 0  2907 3106086 0.064 1.649 0.09917234   .
+# Season 4:   S = 0  2614 3106083 0.057 1.483 0.13817263    
+# Season 5:   S = 0  2762 3106073 0.060 1.567 0.11720613    
+# Season 6:   S = 0  3381 3106074 0.074 1.918 0.05513217   .
+# Season 7:   S = 0  2982 3075479 0.066 1.700 0.08916281   .
+# Season 8:   S = 0  4417 3075480 0.097 2.518 0.01179905   *
+# Season 9:   S = 0  3984 3075481 0.088 2.271 0.02313537   *
+# Season 10:   S = 0 5431 3075484 0.120 3.096 0.00195952  **
+# Season 11:   S = 0 5921 3075481 0.130 3.376 0.00073625 ***
+# Season 12:   S = 0 4524 3075485 0.100 2.579 0.00990553  **
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1 
+
+# The result shows that in the spring there is no increase in the dates gathered in one month. For example, in April(season 4) and also May, there's no significant trend in the dates that are sampled. But this data doesn't show comparison beterrn months
+
 ```
 
 Interpreting results of the Seasonal Mann-Kendall Test: 

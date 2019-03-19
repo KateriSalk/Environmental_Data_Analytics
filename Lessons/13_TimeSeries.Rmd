@@ -74,7 +74,7 @@ PeterPaul.summertemp <-
   filter(daynum > 151 & daynum < 243 & depth == 0 ) %>%
   #add a "week" column to represent seasonality
   mutate(Week = week(sampledate)) %>%
-  #code won't work if there are NAs
+  #code won't work(further down) if there are NAs
   na.exclude()
 
 ggplot(PeterPaul.summertemp, aes(x = sampledate, y = temperature_C, color = lakename)) +
@@ -82,18 +82,30 @@ ggplot(PeterPaul.summertemp, aes(x = sampledate, y = temperature_C, color = lake
   scale_color_manual(values = c("#7fcdbb", "#253494"))
 ```
 
+We know temperature on a singles day depends on the day before in the season.
 Next, we will determine the degree of temporal autocorrelation in our dataset. We will use the package `nlme` for our analyses. Another good package for running hierarchical, or mixed-effects, models is `lme4`. For the basic types of hierarchical models, these packages have about the same functionality.
 
 ```{r}
 # Determine autocorrelation in residuals
 TempTest.auto <- lme(data = PeterPaul.summertemp,
-                     temperature_C ~ sampledate * lakename, 
-                     random = ~1|Week)
+                     temperature_C ~ sampledate * lakename, #response variable: temperature, predicing variables: sample date and lakename; this is a fixed effect coavoa model
+                     random = ~1|Week) #this is our random effect, 1 means each week has an intercept in the function
 TempTest.auto
 
 ACF(TempTest.auto)
 
 ```
+
+Random effects:
+ Formula: ~1 | Week
+        (Intercept) Residual
+StdDev:    1.588171 1.941958
+
+we are interested in variability instead of the intercept (this is for fixed effects)
+
+1.58 standard deviation is the variability in temperature across the season
+
+
 This model structure should look familiar, with a typical linear model structure and dataframe defined. The addition here is that we have defined Week as a random variable. Essentially, we are interested not in the specific effects of each week but in the variability among weeks, so we have defined it as a random effect (essentially coming from a larger distribution of seasonal variability). The ~1 statement indicates that each week has its own intercept in the model. From here, we want to take the first order correlation to specify our autocorrelation structure. From the ACF output, we take the 2nd value (the innermost group level) to define the degree of autocorrelation. This number will always fall between 0 and 1. Notice that there is a fairly large degree of autocorrelation in our variables.
 
 We will now create a repeated measures ANOVA model now that we have defined our autocorrelation structure. The way we have set up this model, we are considering temporal autocorrelation within the levels of Week, and we have retained Week as a random effect. 
@@ -106,10 +118,27 @@ TempTest.mixed <- lme(data = PeterPaul.summertemp,
                      random = ~1|Week,
                      #specify autocorrelation structure of order 1
                      #sampledate is duplicated in some cases, so need to split up by lake
-                     correlation = corAR1(form = ~ sampledate/lakename|Week, value = 0.423),
+                     correlation = corAR1(form = ~ sampledate/lakename|Week, value = 0.423), #R doesn't like when it's on the same date, so we specify by lake name
                      #define method as restricted maximum likelihood
                      method = "REML")
 summary(TempTest.mixed)
+
+# Random effects:
+#  Formula: ~1 | Week
+#         (Intercept) Residual
+# StdDev:    1.618912 1.930645
+# there is a standard deviation of 1.61 degree celcius across the season
+
+#                                   Value Std.Error  DF  t-value p-value
+# (Intercept)                   20.466650 0.5323160 846 38.44831  0.0000
+# sampledate                     0.000099 0.0000266 846  3.73751  0.0002
+# lakenamePeter Lake             0.072415 0.4409492 846  0.16423  0.8696
+# sampledate:lakenamePeter Lake  0.000005 0.0000379 846  0.12217  0.9028
+# the 20.46 degree is paul lake on the first date of sampling
+# 0.000099*365*32 = 1.16 degree increase from 1984 to 2016
+# not much difference between two lakes p = 0.87
+# no interaction between date and lake p=0.9
+
 
 # Compare the random effects model with the fixed effects model
 TempTest.fixed <- gls(data = PeterPaul.summertemp,
@@ -117,14 +146,35 @@ TempTest.fixed <- gls(data = PeterPaul.summertemp,
                       method = "REML")
 summary(TempTest.fixed)
 
+# Coefficients:
+#                                   Value Std.Error  t-value p-value
+# (Intercept)                   20.800214 0.3770183 55.17031  0.0000
+# sampledate                     0.000085 0.0000326  2.59341  0.0097
+# lakenamePeter Lake             0.085356 0.5344819  0.15970  0.8732
+# sampledate:lakenamePeter Lake  0.000006 0.0000463  0.12712  0.8989
+
+# why bother doing the random effect model if the fixed effect model generate a similar coefficients?
+# 0.000085*365*32 = 0.99, this doesn't reach 1 degree, this could have a significant implication for the ecology decision
+
 anova(TempTest.mixed, TempTest.fixed)
 # The lower the AIC, the better.
 # The p-value tells us whether those models have a significantly different fit
+
+#                 Model df      AIC      BIC    logLik   Test  L.Ratio p-value
+# TempTest.mixed     1  7 3678.638 3711.928 -1832.319                        
+# TempTest.fixed     2  5 4019.694 4043.473 -2004.847 1 vs 2 345.0563  <.0001
+# This means that there is a significant difference in the output run by mixted model and the fixed model; and a lower AIC, which is the mixed model, indicates it did a better job in capturing the variability
+
 
 # Post-hoc test
 # This will yield groupings of temperature by lake for the average date value
 TempTest.posthoc = lsmeans(TempTest.mixed, ~ sampledate * lakename)
 cld(TempTest.posthoc, alpha = 0.05, Letters = letters, adjust = "tukey")
+
+ # sampledate lakename   lsmean    SE df lower.CL upper.CL .group
+ #      10989 Paul Lake    21.6 0.443 13     20.4     22.7  a    
+ #      10989 Peter Lake   21.7 0.443 13     20.6     22.8  a
+ # This means that two lakes' temperature has a nice overlap, there is not many difference in their temperature
 
 # display our final relationship
 ggplot(PeterPaul.summertemp, aes(x = sampledate, y = temperature_C, color = lakename)) +
