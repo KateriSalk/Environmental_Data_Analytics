@@ -1,9 +1,11 @@
 ---
-title: "Assignment 8: Time Series Analysis"
-author: "Student Name"
-output: pdf_document
+title: 'Assignment 8: Time Series Analysis'
+author: "Xin Zhang"
 geometry: margin=2.54cm
-editor_options: 
+output:
+  pdf_document: default
+  word_document: default
+editor_options:
   chunk_output_type: console
 ---
 
@@ -32,13 +34,35 @@ The completed exercise is due on Tuesday, 19 March, 2019 before class begins.
 
 Question: Did you do this?
 
-> ANSWER: 
+> ANSWER: I have an idea but haven't posted my choice yet.   
 
 ## Set up your session 
 2. Set up your session. Upload the EPA air quality raw dataset for PM2.5 in 2018, and the processed NTL-LTER dataset for nutrients in Peter and Paul lakes. Build a ggplot theme and set it as your default theme. Make sure date variables are set to a date format.
 
-```{r}
+```{r,warning = FALSE, message = FALSE}
+#packages
+getwd()
+library(tidyverse)
+library(lubridate)
+library(nlme)
+library(lsmeans)
+library(multcompView)
+library(trend)
 
+#load datasets
+PM2.5 <- read.csv("./Data/Raw/EPAair_PM25_NC2018_Raw.csv")
+PeterPaul.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaul_Processed.csv")
+
+# Set date to date format
+PM2.5$Date<- as.Date(PM2.5$Date, format = "%m/%d/%y")
+PeterPaul.nutrients$sampledate <- as.Date(PeterPaul.nutrients$sampledate, 
+                                               format = "%Y-%m-%d")
+
+#set theme
+mytheme <- theme_classic(base_size = 14) +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "right")
+theme_set(mytheme)
 ```
 
 
@@ -50,8 +74,13 @@ Research question: Do PM2.5 concentrations have a significant trend in 2018?
 
 3a. Illustrate PM2.5 concentrations by date. Do not split aesthetics by site.
 
-```{r}
-
+```{r,warning = FALSE, message = FALSE,fig.width=8, fig.height= 6}
+ggplot(PM2.5, aes(x = Date, y = Daily.Mean.PM2.5.Concentration))+
+geom_point()+
+ylab(expression(paste("PM2.5 Concentration(\U003BCg/m"^3,")")))
+PM2.5Test1 <- lme(data = PM2.5,
+                     Daily.Mean.PM2.5.Concentration ~ Date, random = ~1|Site.Name) 
+summary(PM2.5Test1)
 ```
 
 3b. Insert the following line of code into your R chunk. This will eliminate duplicate measurements on single dates for each site.
@@ -62,24 +91,46 @@ PM2.5 = PM2.5[!duplicated(PM2.5$Date),]
 
 3d. Run a mixed effects model. 
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
+#eliminate duplicate measurements
+PM2.5 = PM2.5[order(PM2.5[,'Date'],-PM2.5[,'Site.ID']),]
+PM2.5 = PM2.5[!duplicated(PM2.5$Date),]
+#temporal autocorrelation
+PM2.5Test.auto <- lme(data = PM2.5,
+                    Daily.Mean.PM2.5.Concentration ~ Date, random = ~1|Site.Name) 
+PM2.5Test.auto 
+ACF(PM2.5Test.auto)
+PM2.5Test.mixed <- lme(data = PM2.5,
+                    Daily.Mean.PM2.5.Concentration ~ Date,
+                     random = ~1|Site.Name,
+                     #specify autocorrelation structure of order 1
+                     correlation = corAR1(form = ~ Date|Site.Name, value = 0.514),
+                     #define method as restricted maximum likelihood
+                     method = "REML")
+summary(PM2.5Test.mixed)
+
 
 ```
 
 Is there a significant increasing or decreasing trend in PM2.5 concentrations in 2018? 
 
-> ANSWER: 
+> ANSWER: No, there is not a significant decreasing trend in PM2.5 concentration in 2018 (hierarchical (mixed-effects) model, t=-1.244, p=0.2143)
 
 3e. Run a fixed effects model with Date as the only explanatory variable. Then test whether the mixed effects model is a better fit than the fixed effect model. 
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
+PM2.5Test.fixed <- gls(data = PM2.5,
+                      Daily.Mean.PM2.5.Concentration ~ Date, 
+                      method = "REML")
+summary(PM2.5Test.fixed)
+anova(PM2.5Test.mixed, PM2.5Test.fixed)
 
 ```
 
 
 Which model is better?
 
-> ANSWER: 
+> ANSWER: The mixed-effects model is better (p<0.0001, AIC=1756.622<1865.202).
 
 
 ## Run a Mann-Kendall test
@@ -88,18 +139,63 @@ Research question: Is there a trend in total N surface concentrations in Peter a
 
 4. Duplicate the Mann-Kendall test we ran for total P in class, this time with total N for both lakes. Make sure to run a test for changepoints in the datasets (and run a second one if a second change point is likely). 
 
-```{r}
+```{r, warning = FALSE, message = FALSE,fig.width=8, fig.height= 6}
+# Wrangle our dataset
+PeterPaul.nutrients.surface <- 
+  PeterPaul.nutrients %>%
+  select(-lakeid, -depth_id, -comments) %>%
+  filter(depth == 0) %>%
+  filter(!is.na(tn_ug))
 
+#ggplot Data Overview
+ggplot(PeterPaul.nutrients.surface, aes(x = sampledate, y = tn_ug, color = lakename)) +
+geom_point() +
+scale_color_manual(values = c("#7fcdbb", "#253494"))
+
+# Split dataset by lake
+Peter.nutrients.surface <- filter(PeterPaul.nutrients.surface, lakename == "Peter Lake")
+Paul.nutrients.surface <- filter(PeterPaul.nutrients.surface, lakename == "Paul Lake")
+
+#PeterLake
+# Run a Mann-Kendall test
+mk.test(Peter.nutrients.surface$tn_ug)
+
+# Test for change point
+pettitt.test(Peter.nutrients.surface$tn_ug)
+
+# Run separate Mann-Kendall for each change point
+mk.test(Peter.nutrients.surface$tn_ug[1:35])
+mk.test(Peter.nutrients.surface$tn_ug[36:98])
+
+# Is there a second change point?
+pettitt.test(Peter.nutrients.surface$tn_ug[36:98])
+
+# Run another Mann-Kendall for the second change point
+mk.test(Peter.nutrients.surface$tn_ug[36:56])
+mk.test(Peter.nutrients.surface$tn_ug[57:98])
+
+#PaulLake
+# Run a Mann-Kendall test
+mk.test(Paul.nutrients.surface$tn_ug)
+
+# Test for change point
+pettitt.test(Paul.nutrients.surface$tn_ug)
+#No changing point for PualLake
 ```
 
 
 What are the results of this test?
 
-> ANSWER: 
+> ANSWER: For Peter lake, there is a trend over time according to the Mann-Kendall test (p<0.0001), Z =7.29, which indicates a positive trend over time. There are two changing points: 36 (around 1993/5/30) and 57 (around 1994/6/25). For Paul lake, there is not a trend over time according to the Mann-Kendall test (p=0.7258). 
 
 5. Generate a graph that illustrates the TN concentrations over time, coloring by lake and adding vertical line(s) representing changepoint(s).
 
-```{r}
-
+```{r,warning = FALSE, message = FALSE,fig.width=8, fig.height= 6}
+ggplot(PeterPaul.nutrients.surface, aes(x = sampledate, y = tn_ug, color = lakename)) + 
+  geom_point() +
+  labs(x= "Date", y="Totoal Nitrogen (\U003BCg/L)",color="Lake")+
+  geom_vline(xintercept = as.Date("1993/5/30"), color="#253494", lty = 2)+ 
+  geom_vline(xintercept = as.Date("1994/6/25"), color="#253494", lty = 2)+
+  scale_color_manual(values = c("#7fcdbb", "#253494"))
 ```
 
