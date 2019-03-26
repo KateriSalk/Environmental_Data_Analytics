@@ -29,17 +29,37 @@ A handy cheat sheet for R markdown can be found [here](https://www.rstudio.com/w
 
 ## WHY R MARKDOWN?
 
-<Fill in our discussion below with bullet points. Use italics and bold for emphasis>
+<Fill in our discussion below with bullet points. Use italics and bold for emphasis> 
+<notes for yourself that will not be shown to others>
+
+- Code, output, and test/notes together in one document
++ knit to useful formats (pdf, html, docx)
+* make sure there has to be a return before the bullet points
+- legible codes + output
+- Git friendly
+- Reproducible
+- Updating capabilities
+- Focus on output and conclusions, not code (flexible formatting)
+- simple syntax and autoreferecing
+
 
 ## TEXT EDITING CHALLENGE
 
 Create a table below that details the example datasets we have been using in class. The first column should contain the name of the dataset and the second column should include some relevant information about the dataset.
 
+Dataset Name | Information
+------------- | -------------
+EPA | Cell 2
+Cell 3 | Cell 4
 
 ## R CHUNK EDITING CHALLENGE
 ### Installing packages
 Create an R chunk below that installs the package `knitr`. Instead of commenting out the code, customize the chunk options such that the code is not evaluated (i.e., not run). 
 
+```{r, eval=FALSE}
+install.packages("knitr")
+
+```
 
 ### Setup
 Create an R chunk below called "setup" that checks your working directory, loads the packages `tidyverse` and `knitr`, and sets a ggplot theme. 
@@ -48,6 +68,26 @@ Load the NTL-LTER_Lake_Nutrients_Raw dataset, display the head of the dataset, a
 
 Customize the chunk options such that the code is run but is not displayed in the final document.
 
+```{r, echo=FALSE}
+#setup
+getwd()
+library(tidyverse)
+library(knitr)
+
+#set theme
+mytheme <- theme_classic(base_size = 14) +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "top")
+theme_set(mytheme)
+
+#load dataset
+nutrients <- read.csv("./Data/Raw/NTL-LTER_Lake_Nutrients_Raw.csv")
+head(nutrients)
+
+# Set date to date format
+nutrients$sampledate<- as.Date(nutrients$sampledate, format = "%m/%d/%y")
+
+```
 
 ### Data Exploration, Wrangling, and Visualization
 Create an R chunk below to create a processed dataset do the following operations: 
@@ -55,8 +95,23 @@ Create an R chunk below to create a processed dataset do the following operation
 * Include all columns except lakeid, depth_id, and comments
 * Include only surface samples (depth = 0 m)
 
+```{r}
+nutrients_sel <- nutrients %>%
+  select ("lakename", "year4", "daynum", "sampledate", "depth","tn_ug", "tp_ug", "nh34", "no23", "po4")%>%
+  filter(depth == 0)
+
+```
 
 Create a second R chunk to create a summary dataset with the mean, minimum, maximum, and standard deviation of total nitrogen concentrations for each lake. Create a second summary dataset that is identical except that it evaluates total phosphorus. Customize the chunk options such that the code is run but not displayed in the final document. 
+
+```{r, echo=FALSE}
+nu_summary <- nutrients_sel %>%
+  group_by(lakename) %>%
+  summarise(tn_mean = mean (tn_ug),
+            tn_min = min (tn_ug),
+            tn_max = max (tn_ug),
+            tn_sd = sd (tn_ug))
+```
 
 
 Create a third R chunk that uses the function `kable` in the knitr package to display two tables: one for the summary dataframe for total N and one for the summary dataframe of total P. Use the `caption = " "` code within that function to title your tables. Customize the chunk options such that the final table is displayed but not the code used to generate the table. 
