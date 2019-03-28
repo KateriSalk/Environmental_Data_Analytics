@@ -111,10 +111,23 @@ nu_summary <- nutrients_sel %>%
             tn_min = min (tn_ug),
             tn_max = max (tn_ug),
             tn_sd = sd (tn_ug))
+
+tp_summary <- nutrients_sel %>%
+  group_by(lakename) %>%
+  summarise(tn_mean = mean (tp_ug),
+            tn_min = min (tp_ug),
+            tn_max = max (tp_ug),
+            tn_sd = sd (tp_ug))
 ```
 
 
 Create a third R chunk that uses the function `kable` in the knitr package to display two tables: one for the summary dataframe for total N and one for the summary dataframe of total P. Use the `caption = " "` code within that function to title your tables. Customize the chunk options such that the final table is displayed but not the code used to generate the table. 
+
+```{r}
+kable(nu_summary, caption="Total N")
+kable(tp_summary, caption="Total p")
+
+```
 
 
 Create a fourth and fifth R chunk that generates two plots (one in each chunk): one for total N over time with different colors for each lake, and one with the same setup but for total P. Decide which geom option will be appropriate for your purpose, and select a color palette that is visually pleasing and accessible. Customize the chunk options such that the final figures are displayed but not the code used to generate the figures. In addition, customize the chunk options such that the figures are aligned on the left side of the page. Lastly, add a fig.cap chunk option to add a caption (title) to your plot that will display underneath the figure.
